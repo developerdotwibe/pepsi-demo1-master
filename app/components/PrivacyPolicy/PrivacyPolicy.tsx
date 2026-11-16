@@ -1,6 +1,13 @@
+"use client";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import "./PrivacyPolicy.css";
+
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 type PolicySection = {
     heading: string;
@@ -60,8 +67,68 @@ const sections: PolicySection[] = [
 ];
 
 export default function PrivacyPolicy() {
+
+    const privacyRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        if (!privacyRef.current) return;
+
+        const ctx = gsap.context(() => {
+
+            // Breadcrumb and main heading
+            gsap.from(".delivery-breadcrumb, .privacy-page h1", {
+                y: 50,
+                opacity: 0,
+                duration: 0.9,
+                stagger: 0.2,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: ".privacy-top",
+                    start: "top 80%",
+                    toggleActions: "play none none reverse",
+                },
+            });
+
+            // Intro paragraph
+            gsap.from(".privacy-intro", {
+                y: 40,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: ".privacy-intro",
+                    start: "top 85%",
+                    toggleActions: "play none none reverse",
+                },
+            });
+
+            // Individual privacy sections
+            gsap.utils.toArray<HTMLElement>(".privacy-section").forEach((section) => {
+
+                gsap.from(section.children, {
+                    y: 50,
+                    opacity: 0,
+                    duration: 0.8,
+                    stagger: 0.2,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse",
+                    },
+                });
+
+            });
+
+        }, privacyRef);
+
+        return () => ctx.revert();
+
+    }, []);
+
+
     return (
-        <main className="privacy-page">
+        <main className="privacy-page" ref={privacyRef}>
             <section className="privacy-top">
                 <div className="container">
 

@@ -3,7 +3,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import "./Delivery.css";
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 type InfoItem = {
     title: string;
@@ -27,6 +31,9 @@ export default function Delivery() {
     const [pageTitle, setPageTitle] = useState("Delivery or Warehouse Pick Up");
     const [homeDeliveryContent, setHomeDeliveryContent] = useState<string[]>([]);
     const [warehousePickupContent, setWarehousePickupContent] = useState<string[]>([]);
+
+const deliveryRef = useRef<HTMLElement>(null);
+
 
     useEffect(() => {
         const fetchDeliveryPage = async () => {
@@ -56,8 +63,50 @@ export default function Delivery() {
         fetchDeliveryPage();
     }, []);
 
+
+
+// animation ...on scroll....
+
+useEffect(() => {
+    if (!deliveryRef.current) return;
+
+    const ctx = gsap.context(() => {
+
+        const sections = gsap.utils.toArray<HTMLElement>(
+            ".delivery-section"
+        );
+
+        sections.forEach((section) => {
+
+            const elements = section.querySelectorAll(
+                ".delivery-breadcrumb, h1, p, .delivery-btn, .delivery-column"
+            );
+
+            gsap.from(elements, {
+                y: 60,
+                opacity: 0,
+                duration: 0.9,
+                stagger: 0.2,
+                ease: "power3.out",
+
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse",
+                },
+            });
+
+        });
+
+    }, deliveryRef);
+
+    return () => ctx.revert();
+
+}, [homeDeliveryContent, warehousePickupContent]);
+
+
     return (
-        <main className="delivery-page">
+        <main className="delivery-page" ref={deliveryRef}>
             {/* Intro + Free Home Delivery */}
             <section className="delivery-section">
                 <div className="container">

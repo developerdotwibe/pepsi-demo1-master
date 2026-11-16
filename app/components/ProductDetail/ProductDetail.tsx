@@ -2,9 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./ProductDetail.css";
 import im from "../../../public/images/pepsi-can5.png"
+
+gsap.registerPlugin(ScrollTrigger);
+
 
 type ProductDetailProps = {
     category?: string;
@@ -47,8 +52,73 @@ export default function ProductDetail({
     const decrease = () => setQuantity((q) => Math.max(MIN_QTY, q - 1));
     const increase = () => setQuantity((q) => q + 1);
 
+
+
+    const productRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        if (!productRef.current) return;
+
+        const ctx = gsap.context(() => {
+
+            // Breadcrumb animation
+            gsap.from(".delivery-breadcrumb", {
+                y: 20,
+                opacity: 0,
+                duration: 0.7,
+                ease: "power2.out",
+            });
+
+            // Product image animation
+            gsap.from(".product-image", {
+                x: -70,
+                opacity: 0,
+                scale: 0.92,
+                duration: 1.2,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: ".product-main",
+                    start: "top 80%",
+                    toggleActions: "play none none reverse",
+                },
+            });
+
+            // Product information animation
+            gsap.from(".product-info > *", {
+                x: 60,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.12,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: ".product-info",
+                    start: "top 80%",
+                    toggleActions: "play none none reverse",
+                },
+            });
+
+            // Product features animation
+            gsap.from(".product-feature", {
+                y: 60,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: ".product-features",
+                    start: "top 80%",
+                    toggleActions: "play none none reverse",
+                },
+            });
+
+        }, productRef);
+
+        return () => ctx.revert();
+
+    }, []);
+
     return (
-        <main className="product-page">
+        <main className="product-page" ref={productRef}>
             <section className="product-top">
                 <div className="container">
                     <nav className="delivery-breadcrumb " aria-label="Breadcrumb">
@@ -56,21 +126,21 @@ export default function ProductDetail({
                         <span>/</span>
                         <Link href="/products">Products</Link>
                         <span>/</span>
-                            <Link href="" className="current">Product Name</Link>
-                    
+                        <Link href="" className="current">Product Name</Link>
+
                     </nav>
 
                     <div className="product-main">
                         <div className="product-image">
-                            <Image src={im} alt={name}  priority />
+                            <Image src={im} alt={name} priority />
                         </div>
 
                         <div className="product-info">
                             <h4>{category}</h4>
                             <h1>
-                                   {name}
+                                {name}
                                 <span> {variant}</span>
-                             
+
                             </h1>
                             <h2>{price}</h2>
                             <p>[PRODUCT NAME] delivers the classic flavor you love with a crisp, refreshing finish. Light, smooth, and satisfying, it's perfect for enjoying anytime. Great for sharing at home or gatherings. 1.25 liter bottles, 12 pack.</p>
