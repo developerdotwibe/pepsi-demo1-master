@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from 'react';
-import AnimatedDropdown from '../animatedDrop/AnimatedDropdown';
-import './product-home.css';
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import AnimatedDropdown from "../animatedDrop/AnimatedDropdown";
+import "./product-home.css";
+import Image from "next/image";
 
 export interface FilterValues {
     search: string;
@@ -13,35 +13,31 @@ export interface FilterValues {
     sort: string;
 }
 
+interface FilterOption {
+    id: number;
+    name: string;
+    slug: string;
+    count: number;
+}
+
+interface FilterApiResponse {
+    status: boolean;
+    data: {
+        brand: FilterOption[];
+        type: FilterOption[];
+        packaging: FilterOption[];
+    };
+}
+
+interface DropdownOption {
+    value: string;
+    label: string;
+}
+
 interface PrdFilterProps {
     values?: FilterValues;
     onChange?: (values: Partial<FilterValues>) => void;
 }
-
-export const BRAND_OPTIONS = [
-    { value: "all", label: "All Brands" },
-    { value: "pepsi", label: "Pepsi" },
-    { value: "diet-pepsi", label: "Diet Pepsi" },
-    { value: "pepsi-zero-sugar", label: "Pepsi Zero Sugar" },
-    { value: "pepsi-wild-cherry", label: "Pepsi Wild Cherry" },
-];
-
-export const TYPE_OPTIONS = [
-    { value: "all", label: "All Types" },
-    { value: "regular", label: "Regular" },
-    { value: "zero-sugar", label: "Zero Sugar" },
-    { value: "diet", label: "Diet" },
-    { value: "cherry", label: "Cherry" },
-];
-
-export const SIZE_OPTIONS = [
-    { value: "all", label: "All Serving Sizes" },
-    { value: "250ml", label: "250ml" },
-    { value: "330ml", label: "330ml" },
-    { value: "500ml", label: "500ml" },
-    { value: "1L", label: "1L" },
-    { value: "2L", label: "2L" },
-];
 
 export const SORT_OPTIONS = [
     { value: "price-desc", label: "Price High to Low" },
@@ -59,7 +55,65 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
         sort: "price-desc",
     });
 
+    const [brandOptions, setBrandOptions] = useState<DropdownOption[]>([
+        { value: "all", label: "All Brands" },
+    ]);
+
+    const [typeOptions, setTypeOptions] = useState<DropdownOption[]>([
+        { value: "all", label: "All Types" },
+    ]);
+
+    const [sizeOptions, setSizeOptions] = useState<DropdownOption[]>([
+        { value: "all", label: "All Serving Sizes" },
+    ]);
+
     const currentValues = values || localValues;
+
+    useEffect(() => {
+        const fetchFilterOptions = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/productsfilters`
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch product filters");
+                }
+
+                const result: FilterApiResponse = await response.json();
+
+                if (result.status && result.data) {
+                    setBrandOptions([
+                        { value: "all", label: "All Brands" },
+                        ...result.data.brand.map((item) => ({
+                            value: item.slug,
+                            label: item.name,
+                        })),
+                    ]);
+
+                    setTypeOptions([
+                        { value: "all", label: "All Types" },
+                        ...result.data.type.map((item) => ({
+                            value: item.slug,
+                            label: item.name,
+                        })),
+                    ]);
+
+                    setSizeOptions([
+                        { value: "all", label: "All Serving Sizes" },
+                        ...result.data.packaging.map((item) => ({
+                            value: item.slug,
+                            label: item.name,
+                        })),
+                    ]);
+                }
+            } catch (error) {
+                console.error("Error fetching product filters:", error);
+            }
+        };
+
+        fetchFilterOptions();
+    }, []);
 
     const handleUpdate = (field: keyof FilterValues, val: string) => {
         if (onChange) {
@@ -82,10 +136,14 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
                         value={currentValues.search}
                         onChange={(e) => handleUpdate("search", e.target.value)}
                     />
-                    <button className="search-btn" type="button" aria-label="Search">
+                    <button
+                        className="search-btn"
+                        type="button"
+                        aria-label="Search"
+                    >
                         <Image
-                            src={'/images/icons/search-icon.svg'}
-                            alt={'Search Icon'}
+                            src="/images/icons/search-icon.svg"
+                            alt="Search Icon"
                             width={19}
                             height={19}
                             sizes="(max-width: 768px) 80vw, 25vw"
@@ -95,12 +153,12 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
                 </div>
             </div>
 
-            {/* Brand Dropdown */}
+            {/* Brand */}
             <div className="prft-col1 col-md-2">
                 <h3>Brand</h3>
                 <div className="filter-col">
                     <AnimatedDropdown
-                        options={BRAND_OPTIONS}
+                        options={brandOptions}
                         value={currentValues.brand}
                         onChange={(val) => handleUpdate("brand", val)}
                         placeholder="All Brands"
@@ -108,12 +166,12 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
                 </div>
             </div>
 
-            {/* Type Dropdown */}
+            {/* Type */}
             <div className="prft-col1 col-md-2">
                 <h3>Type</h3>
                 <div className="filter-col">
                     <AnimatedDropdown
-                        options={TYPE_OPTIONS}
+                        options={typeOptions}
                         value={currentValues.type}
                         onChange={(val) => handleUpdate("type", val)}
                         placeholder="All Types"
@@ -121,12 +179,12 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
                 </div>
             </div>
 
-            {/* Serving Size Dropdown */}
+            {/* Serving Size */}
             <div className="prft-col1 col-md-2">
                 <h3>Serving Size</h3>
                 <div className="filter-col">
                     <AnimatedDropdown
-                        options={SIZE_OPTIONS}
+                        options={sizeOptions}
                         value={currentValues.size}
                         onChange={(val) => handleUpdate("size", val)}
                         placeholder="All Serving Sizes"
@@ -134,7 +192,7 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
                 </div>
             </div>
 
-            {/* Sort by Dropdown */}
+            {/* Sort By - Static */}
             <div className="prft-col1 col-md-2">
                 <h3>Sort By</h3>
                 <div className="filter-col">
