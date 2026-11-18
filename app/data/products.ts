@@ -29,6 +29,7 @@ export interface ApiCategory {
 export interface Product {
     id: number;
     name: string;
+    slug: string;
     desc: string;
     image: string;
     brand: string;
@@ -54,6 +55,7 @@ export function mapCategoryProducts(categories: ApiCategory[]): ProductCategory[
         products: (category.products || []).map((item) => ({
             id: item.id,
             name: item.title,
+            slug: item.slug,
             desc: item["wck-meta"]?.subtitle_product?.[0] || "",
             image: item.image || "/images/product-placeholder.png",
             brand: (
