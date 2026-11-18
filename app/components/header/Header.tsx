@@ -9,7 +9,7 @@ import "./header.css";
 const MENU = [
     { label: "Home", href: "/" },
     { label: "Products", href: "/shop", dropdown: true },
-    { label: "Delivery/Pick up", href: "/delivery-page" },
+    { label: "Delivery/Pick up", href: "/delivery" },
     { label: "Contact", href: "/contact" },
     { label: "About", href: "/about-us" },
 ];
