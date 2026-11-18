@@ -70,7 +70,7 @@ useEffect(() => {
                     &times;
                 </button>
                 <div className="product-form-scroll-div" data-lenis-prevent >
-                    <h2>We carry a wide selection of products</h2>
+                    <h2>We carry a wide selection of productssss</h2>
                     <p>
                         <span>keep adding more for free home delivery or curbside pickup.</span>
                        

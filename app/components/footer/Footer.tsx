@@ -125,7 +125,7 @@ useGSAP(
                         <h4>Quick Links</h4>
                         <ul>
                             <li><Link href="/">Home</Link></li>
-                            <li><Link href="/products">Products</Link></li>
+                            <li><Link href="/shop">Products</Link></li>
                             <li><Link href="/contact">Contact</Link></li>
                             <li><Link href="/about">About us</Link></li>
                         </ul>
