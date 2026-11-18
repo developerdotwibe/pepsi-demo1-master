@@ -131,7 +131,9 @@ useEffect(() => {
                         favorite beverages.
                     </p>
 
-                    <button className="delivery-btn">Free Home Delivery</button>
+                    <Link href="" className="delivery-btn">
+                        Free Home Delivery
+                    </Link>
                     <div className="delivery-columns">
                         {homeDeliveryContent.map((content, index) => ( content && (
                         <article key={index} className="delivery-column">
@@ -145,7 +147,9 @@ useEffect(() => {
             {/* Free Warehouse Pick Up */}
             <section className="delivery-section delivery-section-alt">
                 <div className="container">
-                    <button className="delivery-btn">Free Warehouse Pick Up</button>
+                    <Link href="" className="delivery-btn">
+                        Free Warehouse Pick Up
+                    </Link>
                     <div className="delivery-columns">
                         {warehousePickupContent.map((content, index) => ( content && (
                         <article key={index} className="delivery-column">
