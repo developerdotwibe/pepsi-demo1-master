@@ -7,36 +7,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-
-interface HomePageResponse {
-  "wck-meta"?: {
-    home_about_content?: string[];
-    home_about_backgroundimg?: string[];
-  };
+interface HomeCont2Props {
+    aboutContent: string;
+    backgroundImage: string;
 }
 
-export function HomeCont2() {
+export function HomeCont2({aboutContent, backgroundImage}: HomeCont2Props) {
   const sectionRef = useRef<HTMLElement>(null);
-  const [aboutContent, setAboutContent] = useState("");
-  const [backgroundImage, setBackgroundImage] = useState("");
-
-  useEffect(() => {
-    const fetchAboutContent = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/page/home`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch home about content");
-        }
-        const data: HomePageResponse = await response.json();
-        setAboutContent(data["wck-meta"]?.home_about_content?.[0] || "");
-        setBackgroundImage(data["wck-meta"]?.home_about_backgroundimg?.[0] || "");
-      }
-      catch (error) {
-        console.error("Error fetching home about content:", error);
-      }
-    };
-    fetchAboutContent();
-  }, []);
 
   useGSAP(
     () => {

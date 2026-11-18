@@ -8,38 +8,14 @@ import { useGSAP } from "@gsap/react";
 import './homeCont1.css'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-
-interface HomePageResponse {
-  "wck-meta"?: {
-    hmdescription?: string[];
-    description_backgroundurl?: string[];
-  };
+interface HomeCont1Props {
+    description: string;
+    videoUrl: string;
 }
 
-export default function HomeCont1() {
+export default function HomeCont1({description, videoUrl}: HomeCont1Props) {
   const sectionRef = useRef<HTMLElement>(null);
-  const [description, setDescription] = useState("");
-  const [videoId, setVideoId] = useState("");
-
-  useEffect(() => {
-    const fetchHomeDescription = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/page/home`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch home description");
-        }
-        const data: HomePageResponse = await response.json();
-        setDescription(data["wck-meta"]?.hmdescription?.[0] || "");
-        const videoUrl = data["wck-meta"]?.description_backgroundurl?.[0] || "";
-        const extractedVideoId = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/)?.[1] || "";
-        setVideoId(extractedVideoId);
-      }
-      catch (error) {
-        console.error("Error fetching home description:", error);
-      }
-    };
-    fetchHomeDescription();
-  }, []);
+  const videoId = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/)?.[1] || "";
 
   useGSAP(
     () => {

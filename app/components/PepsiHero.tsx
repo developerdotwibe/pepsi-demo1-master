@@ -8,36 +8,16 @@ const MOBILE_QUERY = "(max-width: 767px)";
 
 type Mode = "pending" | "mobile" | "desktop";
 
-interface HomePageResponse {
-  "wck-meta"?: {
-    banner_text_new?: string[];
-  };
+interface PepsiHeroProps {
+    bannerText: string;
 }
 
-export default function PepsiHero() {
+export default function PepsiHero({ bannerText }: PepsiHeroProps) {
   const [mode, setMode] = useState<Mode>("pending");
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const heroContentRef = useRef<HTMLDivElement>(null);
-  const [bannerText, setBannerText] = useState("");
-
-  useEffect(() => {
-    const fetchHomeBanner = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/page/home`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch home banner");
-        }
-        const data: HomePageResponse = await response.json();
-        setBannerText(data["wck-meta"]?.banner_text_new?.[0] || "");
-      }
-      catch (error) {
-        console.error("Error fetching home banner:", error);
-      }
-    };
-    fetchHomeBanner();
-  }, []);
 
   // Detect mobile / desktop (and react when the screen is resized or rotated)
   useEffect(() => {
