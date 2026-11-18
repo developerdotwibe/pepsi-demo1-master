@@ -79,7 +79,7 @@ useEffect(() => {
         sections.forEach((section) => {
 
             const elements = section.querySelectorAll(
-                ".delivery-breadcrumb, h1, p, .delivery-btn, .delivery-column"
+                ".delivery-breadcrumb, h1, p, .delivery-column"
             );
 
             gsap.from(elements, {
