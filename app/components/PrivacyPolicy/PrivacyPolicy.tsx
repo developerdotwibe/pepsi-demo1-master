@@ -135,7 +135,7 @@ export default function PrivacyPolicy() {
                     <nav className="delivery-breadcrumb " aria-label="Breadcrumb">
                         <Link href="/">Home</Link>
                         <span>/</span>
-                        <Link href="/products" className="current">Privacy</Link>
+                        <Link href="/shop" className="current">Privacy</Link>
 
 
                     </nav>

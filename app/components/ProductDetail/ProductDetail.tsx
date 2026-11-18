@@ -124,7 +124,7 @@ export default function ProductDetail({
                     <nav className="delivery-breadcrumb " aria-label="Breadcrumb">
                         <Link href="/">Home</Link>
                         <span>/</span>
-                        <Link href="/products">Products</Link>
+                        <Link href="/shop">Products</Link>
                         <span>/</span>
                         <Link href="" className="current">Product Name</Link>
 
@@ -180,8 +180,8 @@ export default function ProductDetail({
 
                             <div className="product-meta">
                                 <p>
-                                    Categories: <Link href="/products">{category}</Link>,{" "}
-                                    <Link href="/products">{brand}</Link>
+                                    Categories: <Link href="/shop">{category}</Link>,{" "}
+                                    <Link href="/shop">{brand}</Link>
                                 </p>
                             </div>
                         </div>

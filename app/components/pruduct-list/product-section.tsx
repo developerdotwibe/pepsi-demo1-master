@@ -157,7 +157,7 @@ export default function ProductSection() {
                             <h4>{product.title}</h4>
                             <p>{product["wck-meta"]?.subtitle_product?.[0] || ""}</p>
 
-                            <Link href="/products" className="prdt-btn">FIND OUT MORE</Link>
+                            <Link href="/shop" className="prdt-btn">FIND OUT MORE</Link>
                         </div>
                     </div>
                 ))}

@@ -98,7 +98,7 @@ export default function ProductMini() {
                 </div>
 
                 <div className="product-mini-btn">
-                    <Link href="/products" className="prdt-btn">
+                    <Link href="/shop" className="prdt-btn">
                         VIEW MORE
                     </Link>
                 </div>

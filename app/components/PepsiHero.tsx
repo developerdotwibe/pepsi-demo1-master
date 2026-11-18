@@ -297,7 +297,7 @@ export default function PepsiHero() {
         <div ref={heroContentRef} className="hero-content-outer">
           <div className="pepsi-hero-content">
             <div dangerouslySetInnerHTML={{ __html: bannerText, }} />
-            <Link href="#" className="banner-btn"> Shop now</Link>
+            <Link href="/shop" className="banner-btn"> Shop now</Link>
           </div>
         </div>
 

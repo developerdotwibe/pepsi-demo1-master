@@ -8,7 +8,7 @@ import "./header.css";
 
 const MENU = [
     { label: "Home", href: "/" },
-    { label: "Products", href: "/products", dropdown: true },
+    { label: "Products", href: "/shop", dropdown: true },
     { label: "Delivery/Pick up", href: "/delivery-page" },
     { label: "Contact", href: "/contact" },
     { label: "About", href: "/about-us" },
@@ -16,14 +16,14 @@ const MENU = [
 
 // Dummy product list for the "Products" dropdown: swap the names, links and images for real ones
 const PRODUCTS = [
-    { name: "Pepsi", href: "/products" },
-    { name: "Diet Pepsi", href: "/products" },
-    { name: "Pepsi Zero Sugar", href: "/products" },
-    { name: "Pepsi Wild Cherry", href: "/products" },
-    { name: "Pepsi Prebiotic Cola", href: "/products" },
-    { name: "Mountain Dew", href: "/products" },
-    { name: "7UP", href: "/products" },
-    { name: "Mug Root Beer", href: "/products" },
+    { name: "Pepsi", href: "/shop" },
+    { name: "Diet Pepsi", href: "/shop" },
+    { name: "Pepsi Zero Sugar", href: "/shop" },
+    { name: "Pepsi Wild Cherry", href: "/shop" },
+    { name: "Pepsi Prebiotic Cola", href: "/shop" },
+    { name: "Mountain Dew", href: "/shop" },
+    { name: "7UP", href: "/shop" },
+    { name: "Mug Root Beer", href: "/shop" },
 ];
 const PRODUCT_IMAGE = "/images/pepsi-can1.png";
 
@@ -62,7 +62,7 @@ export default function Header() {
         if (!q) return;
         setOpen(false);
         setSearchOpen(false);
-        router.push(`/products?search=${encodeURIComponent(q)}`);
+        router.push(`/shop?search=${encodeURIComponent(q)}`);
     };
 
     // Lock page scroll and allow Esc to close while the menu is open
