@@ -36,10 +36,6 @@ type ProductDetailProps = {
 
 const features = [
     {
-        title: "Pack size",
-        text: "1.25 liter bottles, sold as a 12 pack.",
-    },
-    {
         title: "Free delivery",
         text: "Free home delivery is available Tuesday – Friday between the hours of 7:00 A.M. and 4:00 P.M., with a minimum of 3 items.",
     },
