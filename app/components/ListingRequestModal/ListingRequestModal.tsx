@@ -7,6 +7,7 @@ import "./ListingRequestModal.css";
 export default function ListingRequestModal() {
     const [open, setOpen] = useState(false);
     const atBottomRef = useRef(false);
+    const shownRef = useRef(false);
 
     // Open once each time the user scrolls down to the bottom of the page.
     useEffect(() => {
@@ -15,13 +16,14 @@ export default function ListingRequestModal() {
                 window.innerHeight + window.scrollY >=
                 document.documentElement.scrollHeight - 8;
 
-            if (reachedBottom && !atBottomRef.current) {
+            if (reachedBottom && !shownRef.current) {
+                shownRef.current = true;
                 setOpen(true);
             }
-            atBottomRef.current = reachedBottom;
         };
 
         window.addEventListener("scroll", onScroll, { passive: true });
+
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
