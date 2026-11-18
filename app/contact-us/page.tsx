@@ -7,7 +7,6 @@ import Header from "../components/header/Header";
 import Footer from "../components/footer/Footer";
 import SmoothScroll from "../components/SmoothScroll";
 import "./contact.css";
-import ProductMini from "../components/product-mini/ProductMini";
 import PageLoader from "../components/PageLoader";
 import FloatingCart from "../components/FloatingCart";
 
@@ -70,7 +69,6 @@ export default function ContactPage() {
           </div>
 
         </section>
-        <ProductMini />
       </main>
       <FloatingCart count={2} />
       <Footer />
