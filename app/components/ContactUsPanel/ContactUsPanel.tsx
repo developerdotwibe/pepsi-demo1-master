@@ -6,15 +6,15 @@ import "./ContactUsPanel.css";
 const CLOSE_DURATION_MS = 1600; // keep in step with the CSS transition
 
 type ContactUsPanelProps = {
-    /** true on the /contact page: open straight away instead of on scroll. */
     openOnMount?: boolean;
-    /** Called after the close animation finishes (e.g. router.back()). */
     onClose?: () => void;
+    contactContent: string;
 };
 
 export default function ContactUsPanel({
     openOnMount = false,
     onClose,
+    contactContent,
 }: ContactUsPanelProps) {
     const [open, setOpen] = useState(false);
     const atBottomRef = useRef(false);
@@ -108,8 +108,13 @@ export default function ContactUsPanel({
                         <div className="cup-left">
                             <div className="cont-box">
                                 <span>Contact us</span>
-                                <h2>We offer local delivery &amp; pickup to:</h2>
-                                <p>Champaign, Urbana, &amp; Savoy Illinois</p>
+                                {contactContent && (
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: contactContent,
+                                        }}
+                                    />
+                                )}
                             </div>
                             <div className="cup-social">
                                 <a href="#" aria-label="Facebook">
