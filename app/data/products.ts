@@ -74,3 +74,69 @@ export function mapCategoryProducts(categories: ApiCategory[]): ProductCategory[
         })),
     }));
 }
+
+export interface FilteredProduct extends ApiProduct {
+    categories: {
+        id: number;
+        name: string;
+        slug: string;
+    }[];
+    attributes?: {
+        name: string;
+        slug: string;
+        options: {
+            slug: string;
+            label: string;
+        }[];
+    }[];
+}
+
+export interface FilteredProductsResponse {
+    status: boolean;
+    pagination: {
+        current_page: number;
+        per_page: number;
+        total_products: number;
+        total_pages: number;
+        has_next_page: boolean;
+        has_prev_page: boolean;
+    };
+    products: FilteredProduct[];
+}
+
+export function mapFilteredProducts(
+    response: FilteredProductsResponse
+): ProductCategory[] {
+    return [
+        {
+            id: 0,
+            name: "",
+            slug: "filtered-products",
+            products: response.products.map((item) => ({
+                id: item.id,
+                name: item.title,
+                slug: item.slug,
+                desc: item["wck-meta"]?.subtitle_product?.[0] || "",
+                image: item.image || "/images/product-placeholder.png",
+                brand: (
+                    item.attributes?.find(
+                        (attribute) => attribute.slug === "pa_brand"
+                    )?.options?.[0]?.slug ||
+                    item["wck-meta"]?.fb_brand?.[0] ||
+                    ""
+                )
+                    .toLowerCase()
+                    .trim()
+                    .replace(/\s+/g, "-"),
+                type: item.categories?.[0]?.slug || "",
+                size:
+                    item.attributes?.find(
+                        (attribute) => attribute.slug === "pa_packaging"
+                    )?.options?.[0]?.slug || "",
+                price: Number(item.price) || 0,
+                link: item.link,
+                totalSales: Number(item["wck-meta"]?.total_sales?.[0]) || 0,
+            })),
+        },
+    ];
+}

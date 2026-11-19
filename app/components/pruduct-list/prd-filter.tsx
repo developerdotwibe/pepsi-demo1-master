@@ -40,6 +40,7 @@ interface PrdFilterProps {
 }
 
 export const SORT_OPTIONS = [
+    { value: "", label: "Select" },
     { value: "price-desc", label: "Price High to Low" },
     { value: "price-asc", label: "Price Low to High" },
     { value: "newest", label: "Newest" },
@@ -52,7 +53,7 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
         brand: "all",
         type: "all",
         size: "all",
-        sort: "price-desc",
+        sort: "",
     });
 
     const [brandOptions, setBrandOptions] = useState<DropdownOption[]>([
