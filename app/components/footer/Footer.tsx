@@ -126,7 +126,17 @@ useGSAP(
                         <ul>
                             <li><Link href="/">Home</Link></li>
                             <li><Link href="/shop">Products</Link></li>
-                            <li><Link href="/contact">Contact</Link></li>
+                            <li>
+                                <a
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        window.dispatchEvent(new Event("open-contact-popup"));
+                                    }}
+                                >
+                                    Contact
+                                </a>
+                            </li>
                             <li><Link href="/about">About us</Link></li>
                         </ul>
                     </div>
