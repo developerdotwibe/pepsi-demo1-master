@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import PrdFilter, {
@@ -16,23 +17,26 @@ import ListingRequestModal from "../components/ListingRequestModal/ListingReques
 interface ProductsClientProps {
     initialCategories: ProductCategory[];
     initialError: string;
+    initialFilters: FilterValues;
 }
 
 export default function ProductsClient({
     initialCategories,
     initialError,
+    initialFilters,
 }: ProductsClientProps) {
     const [categories, setCategories] = useState<ProductCategory[]>(initialCategories);
     const [error, setError] = useState(initialError);
+    const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
-    const [isFiltered, setIsFiltered] = useState(false);
-    const [filters, setFilters] = useState<FilterValues>({
-        search: "",
-        brand: "all",
-        type: "all",
-        size: "all",
-        sort: "",
-    });
+    const [isFiltered, setIsFiltered] = useState(
+        initialFilters.search.trim() !== "" ||
+        initialFilters.brand !== "all" ||
+        initialFilters.type !== "all" ||
+        initialFilters.size !== "all" ||
+        initialFilters.sort !== ""
+    );
+    const [filters, setFilters] = useState<FilterValues>(initialFilters);
     const handleFilterChange = (updated: Partial<FilterValues>) => {
         setFilters((prev) => ({ ...prev, ...updated }));
     };
@@ -46,14 +50,7 @@ export default function ProductsClient({
         });
     };
 
-    const isFirstRender = useRef(true);
-
     useEffect(() => {
-        if (isFirstRender.current) {
-            isFirstRender.current = false;
-            return;
-        }
-
         const fetchFilteredProducts = async () => {
             setLoading(true);
 
@@ -101,8 +98,10 @@ export default function ProductsClient({
                     "price-desc": "price-desc",
                 };
 
-                if (filters.sort) {
-                    params.set("sortby", sortMap[filters.sort]);
+                const sortValue = sortMap[filters.sort];
+
+                if (sortValue) {
+                    params.set("sortby", sortValue);
                 }
 
                 const response = await fetch(
@@ -141,6 +140,23 @@ export default function ProductsClient({
 
         fetchFilteredProducts();
     }, [filters]);
+
+    useEffect(() => {
+        const sortMap: Record<string, string> = {
+            popularity: "popular",
+            date: "newest",
+            price: "price-asc",
+            "price-desc": "price-desc",
+        };
+
+        setFilters({
+            search: searchParams.get("searchname") || "",
+            brand: searchParams.get("brand") || "all",
+            type: searchParams.get("category") || "all",
+            size: searchParams.get("packaging") || "all",
+            sort: sortMap[searchParams.get("sortby") || ""] || "",
+        });
+    }, [searchParams]);
 
     return (
         <>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AnimatedDropdown from "../animatedDrop/AnimatedDropdown";
 import "./product-home.css";
@@ -48,6 +49,8 @@ export const SORT_OPTIONS = [
 ];
 
 export default function PrdFilter({ values, onChange }: PrdFilterProps) {
+    const router = useRouter();
+
     const [localValues, setLocalValues] = useState<FilterValues>({
         search: "",
         brand: "all",
@@ -116,12 +119,66 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
         fetchFilterOptions();
     }, []);
 
+    const navigateToShop = (filterValues: FilterValues) => {
+        const params = new URLSearchParams();
+
+        if (filterValues.search.trim()) {
+            params.set("searchname", filterValues.search.trim());
+        }
+
+        if (filterValues.brand !== "all") {
+            params.set("brand", filterValues.brand);
+        }
+
+        if (filterValues.type !== "all") {
+            params.set("category", filterValues.type);
+        }
+
+        if (filterValues.size !== "all") {
+            params.set("packaging", filterValues.size);
+        }
+
+        const sortMap: Record<string, string> = {
+            popular: "popularity",
+            newest: "date",
+            "price-asc": "price",
+            "price-desc": "price-desc",
+        };
+
+        const sortValue = sortMap[filterValues.sort];
+
+        if (sortValue) {
+            params.set("sortby", sortValue);
+        }
+
+        if (params.toString()) {
+            params.set("search", "1");
+        }
+
+        router.push(`/shop${params.toString() ? `?${params.toString()}` : ""}`);
+    };
+
     const handleUpdate = (field: keyof FilterValues, val: string) => {
+        const updatedValues = {
+            ...currentValues,
+            [field]: val,
+        };
+
         if (onChange) {
             onChange({ [field]: val });
         } else {
-            setLocalValues((prev) => ({ ...prev, [field]: val }));
+            setLocalValues(updatedValues);
         }
+
+        // Search input should not navigate while typing.
+        if (field === "search") return;
+
+        // Navigate immediately when a dropdown selection changes.
+        navigateToShop(updatedValues);
+    };
+
+    const handleSearch = () => {
+        navigateToShop(currentValues);
     };
 
     return (
@@ -136,11 +193,17 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
                         placeholder="Search products..."
                         value={currentValues.search}
                         onChange={(e) => handleUpdate("search", e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                handleSearch();
+                            }
+                        }}
                     />
                     <button
                         className="search-btn"
                         type="button"
                         aria-label="Search"
+                        onClick={handleSearch}
                     >
                         <Image
                             src="/images/icons/search-icon.svg"
