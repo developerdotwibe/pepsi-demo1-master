@@ -6,6 +6,11 @@ import ContactUsPanel from "../ContactUsPanel/ContactUsPanel";
 export default function GlobalContactPopup() {
     const [showPopup, setShowPopup] = useState(false);
     const [contactContent, setContactContent] = useState("");
+    type ContactInfo = {
+        icon: string;
+        content: string;
+    };
+    const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
 
     useEffect(() => {
         const fetchContactPage = async () => {
@@ -19,9 +24,22 @@ export default function GlobalContactPopup() {
                 }
 
                 const data = await response.json();
-                setContactContent(
-                    data["wck-meta"]?.contact_leftsidecontent?.[0] || ""
-                );
+                const meta = data["wck-meta"] || {};
+                setContactContent(meta.contact_leftsidecontent?.[0] || "");
+                setContactInfo([
+                    {
+                        icon: meta.contactinfoicon?.[0] || "",
+                        content: meta.cnt_contact?.[0] || "",
+                    },
+                    {
+                        icon: meta.contactinfoicon_1?.[0] || "",
+                        content: meta.cnt_contact_1?.[0] || "",
+                    },
+                    {
+                        icon: meta.contactinfoicon_2?.[0] || "",
+                        content: meta.cnt_contact_2?.[0] || "",
+                    },
+                ]);
             } catch (error) {
                 console.error("Contact API error:", error);
             }
@@ -65,6 +83,7 @@ export default function GlobalContactPopup() {
         <ContactUsPanel
             openOnMount
             contactContent={contactContent}
+            contactInfo={contactInfo}
             onClose={() => setShowPopup(false)}
         />
     );

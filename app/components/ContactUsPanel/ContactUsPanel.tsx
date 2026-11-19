@@ -5,16 +5,23 @@ import "./ContactUsPanel.css";
 
 const CLOSE_DURATION_MS = 1600; // keep in step with the CSS transition
 
+type ContactInfo = {
+    icon: string;
+    content: string;
+};
+
 type ContactUsPanelProps = {
     openOnMount?: boolean;
     onClose?: () => void;
     contactContent: string;
+    contactInfo: ContactInfo[];
 };
 
 export default function ContactUsPanel({
     openOnMount = false,
     onClose,
     contactContent,
+    contactInfo,
 }: ContactUsPanelProps) {
     const [open, setOpen] = useState(false);
     const atBottomRef = useRef(false);
@@ -146,33 +153,25 @@ export default function ContactUsPanel({
                             </div>
 
                             <ul className="cup-info">
-                                <li>
-                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" />
-                                        <circle cx="12" cy="10" r="2.5" />
-                                    </svg>
-                                    <div>
-                                        1306 W. Anthony Dr.
-                                        <br />
-                                        Champaign, IL 61821
-                                    </div>
-                                </li>
-                                <li>
-                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" />
-                                    </svg>
-                                    <div> <a href="tel:217352-4126">(217) 352-4126</a> </div>
-                                </li>
-                                <li>
-                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <rect x="2" y="4" width="20" height="16" rx="2" />
-                                        <path d="M22 6l-10 7L2 6" />
-                                    </svg>
-                                    <div className="email">
-                                        If you have any questions please contact{" "}
-                                        <a href="mailto:sales@pepsicolacu.com">sales@pepsicolacu.com</a>
-                                    </div>
-                                </li>
+                                {contactInfo.map((item, index) => (
+                                    <li key={index}>
+                                        {item.icon && (
+                                            <img
+                                                src={item.icon}
+                                                alt=""
+                                                width={16}
+                                                height={16}
+                                            />
+                                        )}
+
+                                        <div
+                                            className={index === 2 ? "email" : undefined}
+                                            dangerouslySetInnerHTML={{
+                                                __html: item.content,
+                                            }}
+                                        />
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
