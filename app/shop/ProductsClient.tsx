@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+
 import PrdFilter, {
     FilterValues,
 } from "../components/pruduct-list/prd-filter";
-import {ApiCategory, FilteredProductsResponse, mapCategoryProducts, mapFilteredProducts, ProductCategory} from "../data/products";
+
+import { ProductCategory } from "../data/products";
 import FloatingCart from "../components/FloatingCart";
 import SmoothScroll from "../components/SmoothScroll";
 import "./products.css";
@@ -28,113 +31,93 @@ export default function ProductsClient({
 }: ProductsClientProps) {
     const [categories, setCategories] = useState<ProductCategory[]>(initialCategories);
     const [error, setError] = useState(initialError);
-    const [loading, setLoading] = useState(false);
     const [isFiltered, setIsFiltered] = useState(initialIsFiltered);
     const [filters, setFilters] = useState<FilterValues>(initialFilters);
-    const handleFilterChange = (updated: Partial<FilterValues>) => {
-        setFilters((prev) => ({ ...prev, ...updated }));
-    };
-    const resetFilters = () => {
-        setFilters({
-            search: "",
-            brand: "all",
-            type: "all",
-            size: "all",
-            sort: "",
-        });
-    };
 
-    const isFirstRender = useRef(true);
-        useEffect(() => {
-            if (isFirstRender.current) {
-            isFirstRender.current = false;
+    const router = useRouter();
+
+    // Update product data whenever the server provides new data.
+    useEffect(() => {
+        setCategories(initialCategories);
+        setError(initialError);
+        setIsFiltered(initialIsFiltered);
+    }, [initialCategories, initialError, initialIsFiltered]);
+
+    // Update filters when the URL changes, including browser Back/Forward.
+    useEffect(() => {
+        const sortMap: Record<string, string> = {
+            popularity: "popular",
+            date: "newest",
+            price: "price-asc",
+            "price-desc": "price-desc",
+        };
+
+        const params = new URLSearchParams(window.location.search);
+
+        setFilters({
+            search: params.get("searchname") || "",
+            brand: params.get("brand") || "all",
+            type: params.get("category") || "all",
+            size: params.get("packaging") || "all",
+            sort: sortMap[params.get("sortby") || ""] || "",
+        });
+    }, []);
+
+    // Handle filter changes.
+    const handleFilterChange = (updated: Partial<FilterValues>) => {
+        const updatedFilters = {
+            ...filters,
+            ...updated,
+        };
+
+        setFilters(updatedFilters);
+
+        // Do not navigate while the user is typing in the search field.
+        if ("search" in updated && Object.keys(updated).length === 1) {
             return;
         }
 
-        const fetchFilteredProducts = async () => {
-            setLoading(true);
+        const params = new URLSearchParams();
 
-            try {
-                const params = new URLSearchParams();
+        if (updatedFilters.search.trim()) {
+            params.set("searchname", updatedFilters.search.trim());
+        }
 
-                const isFilterSelected =
-                    filters.search.trim() !== "" ||
-                    filters.brand !== "all" ||
-                    filters.type !== "all" ||
-                    filters.size !== "all" ||
-                    filters.sort !== "";
+        if (updatedFilters.brand !== "all") {
+            params.set("brand", updatedFilters.brand);
+        }
 
-                if (isFilterSelected) {
-                    params.set("search", "1");
-                }
+        if (updatedFilters.type !== "all") {
+            params.set("category", updatedFilters.type);
+        }
 
-                if (filters.search.trim()) {
-                    params.set("searchname", filters.search.trim());
-                }
+        if (updatedFilters.size !== "all") {
+            params.set("packaging", updatedFilters.size);
+        }
 
-                if (filters.brand !== "all") {
-                    params.set("brand", filters.brand);
-                }
-
-                if (filters.type !== "all") {
-                    params.set("category", filters.type);
-                }
-
-                if (filters.size !== "all") {
-                    params.set("packaging", filters.size);
-                }
-
-                const sortMap: Record<string, string> = {
-                    popular: "popularity",
-                    newest: "date",
-                    "price-asc": "price",
-                    "price-desc": "price-desc",
-                };
-
-                const sortValue = sortMap[filters.sort];
-
-                if (sortValue) {
-                    params.set("sortby", sortValue);
-                }
-
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/product-by-categories?${params.toString()}`,
-                    { cache: "no-store" }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch filtered products");
-                }
-
-                const data = await response.json();
-
-                if (isFilterSelected) {
-                    if (!data.status || !Array.isArray(data.products)) {
-                        throw new Error("Invalid filtered products response");
-                    }
-
-                    setCategories(mapFilteredProducts(data as FilteredProductsResponse));
-                    setIsFiltered(true);
-                } else {
-                    if (!Array.isArray(data)) {
-                        throw new Error("Invalid products response");
-                    }
-
-                    setCategories(mapCategoryProducts(data as ApiCategory[]));
-                    setIsFiltered(false);
-                }
-
-                setError("");
-            } catch (err) {
-                console.error("Products filter API error:", err);
-                setError("Unable to load products. Please try again.");
-            } finally {
-                setLoading(false);
-            }
+        const sortMap: Record<string, string> = {
+            popular: "popularity",
+            newest: "date",
+            "price-asc": "price",
+            "price-desc": "price-desc",
         };
 
-        fetchFilteredProducts();
-    }, [filters]);
+        const sortValue = sortMap[updatedFilters.sort];
+
+        if (sortValue) {
+            params.set("sortby", sortValue);
+        }
+
+        if (params.toString()) {
+            params.set("search", "1");
+        }
+
+        router.push(`/shop${params.toString() ? `?${params.toString()}` : ""}`);
+    };
+
+    const resetFilters = () => {
+        router.push("/shop");
+    };
 
     return (
         <>
@@ -151,11 +134,7 @@ export default function ProductsClient({
                             onChange={handleFilterChange}
                         />
 
-                        {loading ? (
-                            <div className="products-empty-state">
-                                <h3>Loading products...</h3>
-                            </div>
-                        ) : error ? (
+                        { error ? (
                             <div className="products-empty-state">
                                 <h3>{error}</h3>
 

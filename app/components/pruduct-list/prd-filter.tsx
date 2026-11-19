@@ -170,11 +170,14 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
             setLocalValues(updatedValues);
         }
 
-        // Search input should not navigate while typing.
+        // Do not navigate while typing in the search field.
         if (field === "search") return;
 
-        // Navigate immediately when a dropdown selection changes.
-        navigateToShop(updatedValues);
+        // On the homepage, navigate directly to the shop.
+        // On the shop page, ProductsClient handles navigation.
+        if (!onChange) {
+            navigateToShop(updatedValues);
+        }
     };
 
     const handleSearch = () => {
