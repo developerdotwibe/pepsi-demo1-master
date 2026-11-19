@@ -1,7 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import PrdFilter, {
@@ -18,24 +17,19 @@ interface ProductsClientProps {
     initialCategories: ProductCategory[];
     initialError: string;
     initialFilters: FilterValues;
+    initialIsFiltered: boolean;
 }
 
 export default function ProductsClient({
     initialCategories,
     initialError,
     initialFilters,
+    initialIsFiltered,
 }: ProductsClientProps) {
     const [categories, setCategories] = useState<ProductCategory[]>(initialCategories);
     const [error, setError] = useState(initialError);
-    const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
-    const [isFiltered, setIsFiltered] = useState(
-        initialFilters.search.trim() !== "" ||
-        initialFilters.brand !== "all" ||
-        initialFilters.type !== "all" ||
-        initialFilters.size !== "all" ||
-        initialFilters.sort !== ""
-    );
+    const [isFiltered, setIsFiltered] = useState(initialIsFiltered);
     const [filters, setFilters] = useState<FilterValues>(initialFilters);
     const handleFilterChange = (updated: Partial<FilterValues>) => {
         setFilters((prev) => ({ ...prev, ...updated }));
@@ -50,14 +44,19 @@ export default function ProductsClient({
         });
     };
 
-    useEffect(() => {
+    const isFirstRender = useRef(true);
+        useEffect(() => {
+            if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
         const fetchFilteredProducts = async () => {
             setLoading(true);
 
             try {
                 const params = new URLSearchParams();
 
-                // Check whether any filter is selected
                 const isFilterSelected =
                     filters.search.trim() !== "" ||
                     filters.brand !== "all" ||
@@ -65,32 +64,26 @@ export default function ProductsClient({
                     filters.size !== "all" ||
                     filters.sort !== "";
 
-                // Pass search=1 only when a filter is selected
                 if (isFilterSelected) {
                     params.set("search", "1");
                 }
 
-                // Pass search text only when entered
                 if (filters.search.trim()) {
                     params.set("searchname", filters.search.trim());
                 }
 
-                // Brand
                 if (filters.brand !== "all") {
                     params.set("brand", filters.brand);
                 }
 
-                // Type
                 if (filters.type !== "all") {
                     params.set("category", filters.type);
                 }
 
-                // Serving Size
                 if (filters.size !== "all") {
                     params.set("packaging", filters.size);
                 }
 
-                // Sort By
                 const sortMap: Record<string, string> = {
                     popular: "popularity",
                     newest: "date",
@@ -119,12 +112,14 @@ export default function ProductsClient({
                     if (!data.status || !Array.isArray(data.products)) {
                         throw new Error("Invalid filtered products response");
                     }
+
                     setCategories(mapFilteredProducts(data as FilteredProductsResponse));
                     setIsFiltered(true);
                 } else {
                     if (!Array.isArray(data)) {
                         throw new Error("Invalid products response");
                     }
+
                     setCategories(mapCategoryProducts(data as ApiCategory[]));
                     setIsFiltered(false);
                 }
@@ -140,23 +135,6 @@ export default function ProductsClient({
 
         fetchFilteredProducts();
     }, [filters]);
-
-    useEffect(() => {
-        const sortMap: Record<string, string> = {
-            popularity: "popular",
-            date: "newest",
-            price: "price-asc",
-            "price-desc": "price-desc",
-        };
-
-        setFilters({
-            search: searchParams.get("searchname") || "",
-            brand: searchParams.get("brand") || "all",
-            type: searchParams.get("category") || "all",
-            size: searchParams.get("packaging") || "all",
-            sort: sortMap[searchParams.get("sortby") || ""] || "",
-        });
-    }, [searchParams]);
 
     return (
         <>
