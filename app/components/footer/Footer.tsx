@@ -145,11 +145,6 @@ useGSAP(
                         <ul>
                             <li>
                                 <Link href="">
-                                    <Image src="/images/icons/cart-icon.svg" alt="Cart" width={19} height={19} />
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="">
                                     <Image src="/images/icons/fb-icon.svg" alt="Facebook" width={19} height={19} />
                                 </Link>
                             </li>
