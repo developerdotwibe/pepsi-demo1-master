@@ -2,9 +2,14 @@ export interface ApiProduct {
     id: number;
     title: string;
     slug: string;
+    type: "simple" | "variable";
     link: string;
     image: string | null;
     price: string;
+    price_range?: {
+        min: string;
+        max: string;
+    } | null;
     regular_price: number;
     sale_price: number | null;
     stock_status: string;
@@ -33,9 +38,14 @@ export interface Product {
     desc: string;
     image: string;
     brand: string;
-    type: string;
+    type: "simple" | "variable";
+    category: string;
     size: string;
     price: number;
+    priceRange?: {
+        min: number;
+        max: number;
+    } | null;
     link: string;
     totalSales: number;
 }
@@ -66,9 +76,16 @@ export function mapCategoryProducts(categories: ApiCategory[]): ProductCategory[
                 .toLowerCase()
                 .trim()
                 .replace(/\s+/g, "-"),
-            type: category.slug,
+            type: item.type,
+            category: category.slug,
             size: item.packaging || "",
             price: Number(item.price) || 0,
+            priceRange: item.price_range
+                ? {
+                    min: Number(item.price_range.min) || 0,
+                    max: Number(item.price_range.max) || 0,
+                }
+                : null,
             link: item.link,
             totalSales: Number(item["wck-meta"]?.total_sales?.[0]) || 0,
         })),
@@ -128,12 +145,19 @@ export function mapFilteredProducts(
                     .toLowerCase()
                     .trim()
                     .replace(/\s+/g, "-"),
-                type: item.categories?.[0]?.slug || "",
+                type: item.type,
+                category: item.categories?.[0]?.slug || "",
                 size:
                     item.attributes?.find(
                         (attribute) => attribute.slug === "pa_packaging"
                     )?.options?.[0]?.slug || "",
                 price: Number(item.price) || 0,
+                priceRange: item.price_range
+                    ? {
+                        min: Number(item.price_range.min) || 0,
+                        max: Number(item.price_range.max) || 0,
+                    }
+                    : null,
                 link: item.link,
                 totalSales: Number(item["wck-meta"]?.total_sales?.[0]) || 0,
             })),

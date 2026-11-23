@@ -181,6 +181,11 @@ export default function ProductsClient({
                                                         <div className="product-card-info">
                                                             <h3>{product.name}</h3>
                                                             <p>{product.desc}</p>
+                                                            <p>
+                                                                {product.type === "variable" && product.priceRange
+                                                                    ? `$${product.priceRange.min.toFixed(2)} - $${product.priceRange.max.toFixed(2)}`
+                                                                    : `$${product.price.toFixed(2)}`}
+                                                            </p>
 
                                                             <Link
                                                                 href={`/product/${product.slug}`}
