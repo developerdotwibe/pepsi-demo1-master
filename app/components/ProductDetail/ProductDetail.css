@@ -344,6 +344,10 @@ background-color: var(--product-blue);
 
 .product-meta a:hover{ color: #ff5a66;}
 
+.delivery-breadcrumb span:last-child {
+    color: #9fb0ff;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 1199px) {
   .product-main {

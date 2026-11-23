@@ -44,12 +44,12 @@ p{
 
 .delivery-breadcrumb a {
   color: var(--color-text);
-  text-decoration: none;
-      transition: all .3s ease-in-out;
+    text-decoration: none;
+    transition: all .3s ease-in-out;
 }
 
 .delivery-breadcrumb a:hover {
-  text-decoration: underline;
+    color: var(--color-accent);
 }
 
 .delivery-breadcrumb span {

@@ -67,63 +67,79 @@ const sections: PolicySection[] = [
 ];
 
 export default function PrivacyPolicy() {
-
+    
     const privacyRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         if (!privacyRef.current) return;
 
+        // Tags to animate
+        const TAGS = "h1, h2, h3, h4, h5, h6, p, li, img, a.btn, button, blockquote, table";
+
+        // Find animatable elements in a block, skipping ones whose ancestor is already selected
+        const getItems = (block: Element | null): HTMLElement[] => {
+            if (!block) return [];
+            const all = Array.from(block.querySelectorAll<HTMLElement>(TAGS));
+            return all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
+        };
+
         const ctx = gsap.context(() => {
+            const root = privacyRef.current!;
 
-            // Breadcrumb and main heading
-            gsap.from(".delivery-breadcrumb, .privacy-page h1", {
-                y: 50,
-                opacity: 0,
-                duration: 0.9,
-                stagger: 0.2,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: ".privacy-top",
-                    start: "top 80%",
-                    toggleActions: "play none none reverse",
-                },
-            });
+            // One shared animation for every element
+            const animate = (els: HTMLElement[], y = 50, onLoad = false) => {
+                els.forEach((el, i) => {
+                    const savedTransition = el.style.transition;
+                    el.style.transition = "none"; // stop CSS transitions fighting GSAP
 
-            // Intro paragraph
-            gsap.from(".privacy-intro", {
-                y: 40,
-                opacity: 0,
-                duration: 0.8,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: ".privacy-intro",
-                    start: "top 85%",
-                    toggleActions: "play none none reverse",
-                },
-            });
-
-            // Individual privacy sections
-            gsap.utils.toArray<HTMLElement>(".privacy-section").forEach((section) => {
-
-                gsap.from(section.children, {
-                    y: 50,
-                    opacity: 0,
-                    duration: 0.8,
-                    stagger: 0.2,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top 85%",
-                        toggleActions: "play none none reverse",
-                    },
+                    gsap.fromTo(
+                        el,
+                        { y, autoAlpha: 0 },
+                        {
+                            y: 0,
+                            autoAlpha: 1,
+                            duration: 0.8,
+                            ease: "power3.out",
+                            delay: onLoad ? i * 0.15 : 0,
+                            overwrite: "auto",
+                            immediateRender: onLoad,
+                            onComplete: () => {
+                                gsap.set(el, { clearProps: "transform,opacity,visibility" });
+                                el.style.transition = savedTransition;
+                            },
+                            scrollTrigger: onLoad
+                                ? undefined
+                                : { trigger: el, start: "top 92%", once: true },
+                        }
+                    );
                 });
+            };
 
+            // Breadcrumb + heading + intro: play on page load
+            animate(
+                [
+                    ...root.querySelectorAll<HTMLElement>(".delivery-breadcrumb, .privacy-top h1, .privacy-intro"),
+                ],
+                50,
+                true
+            );
+
+            // Each privacy section: h2 + paragraphs on scroll
+            root.querySelectorAll<HTMLElement>(".privacy-section").forEach((section) => {
+                animate(getItems(section), 40);
             });
-
         }, privacyRef);
 
-        return () => ctx.revert();
+        // Recalculate trigger positions once fonts/images finish loading
+        const refresh = () => ScrollTrigger.refresh();
+        window.addEventListener("load", refresh);
+        const t = setTimeout(refresh, 500);
 
+        return () => {
+            window.removeEventListener("load", refresh);
+            clearTimeout(t);
+            ctx.revert();
+        };
     }, []);
 
 

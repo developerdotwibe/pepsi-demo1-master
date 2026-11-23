@@ -29,37 +29,84 @@ export default function Delivery({
     const deliveryRef = useRef<HTMLElement>(null);
 
     // GSAP animation
-    useEffect(() => {
-        if (!deliveryRef.current) return;
+// GSAP animation
+useEffect(() => {
+    if (!deliveryRef.current) return;
 
-        const ctx = gsap.context(() => {
-            const sections = gsap.utils.toArray<HTMLElement>(
-                ".delivery-section"
-            );
+    // Tags to animate inside the backend HTML
+    const TAGS = "h1, h2, h3, h4, h5, h6, p, li, img, a.btn, button, blockquote, table";
 
-            sections.forEach((section) => {
-                const elements = section.querySelectorAll(
-                    ".delivery-breadcrumb, h1, p, .delivery-column"
+    // Find animatable elements in a block, skipping ones whose ancestor is already selected
+    const getItems = (block: Element | null): HTMLElement[] => {
+        if (!block) return [];
+        const all = Array.from(block.querySelectorAll<HTMLElement>(TAGS));
+        return all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
+    };
+
+    const ctx = gsap.context(() => {
+        const root = deliveryRef.current!;
+
+        // One shared animation for every element
+        const animate = (els: HTMLElement[], y = 50, onLoad = false) => {
+            els.forEach((el, i) => {
+                const savedTransition = el.style.transition;
+                el.style.transition = "none"; // stop CSS transitions fighting GSAP
+
+                gsap.fromTo(
+                    el,
+                    { y, autoAlpha: 0 },
+                    {
+                        y: 0,
+                        autoAlpha: 1,
+                        duration: 0.8,
+                        ease: "power3.out",
+                        delay: onLoad ? i * 0.15 : 0,
+                        overwrite: "auto",
+                        immediateRender: onLoad,
+                        onComplete: () => {
+                            gsap.set(el, { clearProps: "transform,opacity,visibility" });
+                            el.style.transition = savedTransition;
+                        },
+                        scrollTrigger: onLoad
+                            ? undefined
+                            : { trigger: el, start: "top 92%", once: true },
+                    }
                 );
-
-                gsap.from(elements, {
-                    y: 60,
-                    opacity: 0,
-                    duration: 0.9,
-                    stagger: 0.2,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top 80%",
-                        toggleActions: "play none none reverse",
-                    },
-                });
             });
-        }, deliveryRef);
+        };
 
-        return () => ctx.revert();
-    }, []);
+        // Breadcrumb + intro: play on page load
+        animate(
+            [
+                ...root.querySelectorAll<HTMLElement>(".delivery-breadcrumb"),
+                ...getItems(root.querySelector(".delivery-intro")),
+            ],
+            50,
+            true
+        );
 
+        // Each section: button, columns, column content
+        root.querySelectorAll<HTMLElement>(".delivery-section").forEach((section) => {
+            animate(Array.from(section.querySelectorAll<HTMLElement>(".delivery-btn")), 50);
+
+            section.querySelectorAll<HTMLElement>(".delivery-column").forEach((col) => {
+                animate([col], 60);
+                animate(getItems(col), 30);
+            });
+        });
+    }, deliveryRef);
+
+    // Recalculate trigger positions once images/fonts finish loading
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener("load", refresh);
+    const t = setTimeout(refresh, 500);
+
+    return () => {
+        window.removeEventListener("load", refresh);
+        clearTimeout(t);
+        ctx.revert();
+    };
+}, [deliveryIntro, homeDeliveryContent, warehousePickupContent, homeDeliveryHeading, warehouseHeading]);
     return (
         <main className="delivery-page" ref={deliveryRef}>
 

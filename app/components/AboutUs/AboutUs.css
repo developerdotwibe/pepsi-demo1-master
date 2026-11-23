@@ -234,6 +234,22 @@ padding: 20px 0 20px;
     color: #fff;
 }
 
+.about-description p a {
+    display: inline-block;
+    color: #9FB0FF;
+    transition: all .3s ease-in-out;
+}
+.about-description p a:hover{
+  color: var(--color-accent);
+}
+
+.about-note p a {
+    display: inline-block;
+    color: #9FB0FF;
+    transition: all .3s ease-in-out;
+}
+.about-note p a:hover{  color: var(--color-accent);}
+
 /* ===== Responsive ===== */
 @media (max-width: 1199px) {
   .about-hero h1 {
