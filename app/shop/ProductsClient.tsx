@@ -33,8 +33,13 @@ export default function ProductsClient({
     const [error, setError] = useState(initialError);
     const [isFiltered, setIsFiltered] = useState(initialIsFiltered);
     const [filters, setFilters] = useState<FilterValues>(initialFilters);
-
     const router = useRouter();
+
+    const decodeHtmlEntities = (value: string) => {
+        const textarea = document.createElement("textarea");
+        textarea.innerHTML = value;
+        return textarea.value;
+    };
 
     // Update product data whenever the server provides new data.
     useEffect(() => {
@@ -154,7 +159,7 @@ export default function ProductsClient({
                                     >
                                         {!isFiltered && (
                                             <h2 className="products-category-title">
-                                                {category.name}
+                                                {decodeHtmlEntities(category.name)}
                                             </h2>
                                         )}
 
