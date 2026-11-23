@@ -17,6 +17,10 @@ export interface ApiProductDetail {
     short_description: string;
     featured_image: string;
     price: string;
+    price_range?: {
+        min: string;
+        max: string;
+    };
     categories: {
         id: number;
         name: string;
@@ -24,10 +28,23 @@ export interface ApiProductDetail {
     }[];
     attributes: {
         name: string;
+        slug: string;
+        is_variation: boolean;
         options: {
             slug: string;
             label: string;
         }[];
+    }[];
+    variations: {
+        variation_id: number;
+        attributes: {
+            attribute_packaging: string;
+        };
+        regular_price: number;
+        display_price: number;
+        stock_status: string;
+        is_purchasable: boolean;
+        image: string;
     }[];
 }
 
@@ -52,6 +69,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(MIN_QTY);
     const decrease = () => setQuantity((q) => Math.max(MIN_QTY, q - 1));
     const increase = () => setQuantity((q) => q + 1);
+    const [selectedPackaging, setSelectedPackaging] = useState("");
+    
+    const selectedVariation = product.variations?.find(
+        (variation) =>
+            variation.attributes.attribute_packaging === selectedPackaging
+    );
 
     // Dynamic product values
     const name = product.title;
@@ -61,12 +84,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             attribute.name.toLowerCase().includes("packaging")
         )?.options?.[0]?.label || "";
 
-    const price = product.price
-        ? `$${Number(product.price).toFixed(2)}`
-        : "";
-
-    const image = product.featured_image || "/images/bottle.png";
+    const price = selectedVariation ? `$${Number(selectedVariation.display_price).toFixed(2)}` : product.type === "variable" && product.price_range ? `$${Number(product.price_range.min).toFixed(2)} - $${Number(product.price_range.max).toFixed(2)}` : product.price ? `$${Number(product.price).toFixed(2)}` : "";
+    const image = selectedVariation?.image || product.featured_image || "/images/bottle.png";
     const description = product.short_description || "";
+
+    const packagingOptions =
+        product.attributes.find((attribute) =>
+            attribute.name.toLowerCase().includes("packaging")
+        )?.options || [];
 
     // Static values
     const category = "Carbonated Soft Drinks";
@@ -229,6 +254,31 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                             __html: description,
                                         }}
                                     />
+
+                                    {packagingOptions.length > 0 && (
+                                        <div className="product-variation">
+                                            <label htmlFor="product-packaging">
+                                                Packaging:
+                                            </label>
+
+                                            <select
+                                                id="product-packaging"
+                                                value={selectedPackaging}
+                                                onChange={(e) => setSelectedPackaging(e.target.value)}
+                                            >
+                                                <option value="">Choose an option</option>
+
+                                                {packagingOptions.map((option) => (
+                                                    <option
+                                                        key={option.slug}
+                                                        value={option.label}
+                                                    >
+                                                        {option.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
                                 </>
                             )}
 
