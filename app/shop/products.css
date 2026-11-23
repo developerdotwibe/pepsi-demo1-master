@@ -20,7 +20,7 @@
     padding:0;
     padding-inline: 24px;
 }
-
+ 
 .products-page-main h2 {
     text-align: center;
     color: #ffffff;
@@ -69,20 +69,22 @@
     width: 250px;
     height: 250px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(0, 30, 255, 0.8) 0%, rgba(0, 15, 190, 0.45) 45%, transparent 70%);
+    /* background: radial-gradient(circle, rgba(0, 30, 255, 0.8) 0%, rgba(0, 15, 190, 0.45) 45%, transparent 70%); */
     filter: blur(32px);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: 1;
+    background: radial-gradient(circle, #ffffff 0%, #ffffff 45%, #ffffff 65%, rgb(255, 255, 255) 80%);
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease, background 0.4s ease;
 }
 
 .products-card:hover .product-card-glow {
     transform: translate(-50%, -50%) scale(1.18);
     filter: blur(40px);
-    background: radial-gradient(circle, rgba(0, 45, 255, 0.95) 0%, rgba(0, 20, 220, 0.6) 45%, transparent 70%);
+    /* background: radial-gradient(circle, rgba(0, 45, 255, 0.95) 0%, rgba(0, 20, 220, 0.6) 45%, transparent 70%); */
+    background: radial-gradient(circle, #ffffff 0%, #ffffff 45%, #fffffffc 65%, rgba(255, 255, 255, 0.999) 80%);
 }
 
 .product-card-can {
@@ -111,7 +113,7 @@
     color: #ffffff;
     margin: 0 0 10px;
     font-family: 'PepsiFont', 'pepsifont', sans-serif;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     min-height: 56px;
     display: flex;
@@ -200,6 +202,14 @@
     font-family: 'PepsiFont', 'pepsifont', sans-serif;
     cursor: pointer;
 }
+
+.products-category-list .products-category-section h2{ font-size: 40px; }
+
+.products-category-list .products-category-section:not(:first-child) h2{
+    padding-top: 80px;
+    color: #ff5a66;
+}
+
 
 /* Responsive */
 @media (max-width: 1024px) {
