@@ -217,7 +217,7 @@ body {
 
 .product-list-wrapp h2 {
     text-align: center;
-    color: #fff;
+    color: #ff5a66;
     text-transform: uppercase;
     font-size: clamp(30px, 3.2vw, 60px);
     font-weight: 600;
