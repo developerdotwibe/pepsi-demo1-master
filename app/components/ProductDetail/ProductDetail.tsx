@@ -13,6 +13,7 @@ export interface ApiProductDetail {
     id: number;
     title: string;
     slug: string;
+    type: "simple" | "variable";
     short_description: string;
     featured_image: string;
     price: string;
@@ -49,7 +50,6 @@ const MIN_QTY = 1;
 
 export default function ProductDetail({ product }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(MIN_QTY);
-
     const decrease = () => setQuantity((q) => Math.max(MIN_QTY, q - 1));
     const increase = () => setQuantity((q) => q + 1);
 
@@ -156,65 +156,81 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                         </div>
 
                         <div className="product-info">
-                            <h4>{category}</h4>
+                            {product.type === "simple" ? (
+                                <>
+                                    <h4>{category}</h4>
 
-                            <h1>
-                                {name}
-                                <span> {variant}</span>
-                            </h1>
+                                    <h1>
+                                        {name}
+                                        <span> {variant}</span>
+                                    </h1>
 
-                            <h2>{price}</h2>
+                                    <h2>{price}</h2>
 
-                            <div
-                                dangerouslySetInnerHTML={{
-                                    __html: description,
-                                }}
-                            />
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: description,
+                                        }}
+                                    />
 
-                            <Link href="#nutrition">
-                                Nutrition Information
-                            </Link>
+                                    <Link href="#nutrition">
+                                        Nutrition Information
+                                    </Link>
 
-                            <form
-                                className="product-cart"
-                                onSubmit={(e) => e.preventDefault()}
-                            >
-                                <div className="product-qty-wrap">
-                                    <label htmlFor="product-qty-value">
-                                        Quantity
-                                    </label>
+                                    <form
+                                        className="product-cart"
+                                        onSubmit={(e) => e.preventDefault()}
+                                    >
+                                        <div className="product-qty-wrap">
+                                            <label htmlFor="product-qty-value">
+                                                Quantity
+                                            </label>
 
-                                    <div className="product-qty">
-                                        <button
-                                            type="button"
-                                            onClick={decrease}
-                                            disabled={quantity <= MIN_QTY}
-                                            aria-label="Decrease quantity"
-                                        >
-                                            &minus;
+                                            <div className="product-qty">
+                                                <button
+                                                    type="button"
+                                                    onClick={decrease}
+                                                    disabled={quantity <= MIN_QTY}
+                                                    aria-label="Decrease quantity"
+                                                >
+                                                    &minus;
+                                                </button>
+
+                                                <span
+                                                    id="product-qty-value"
+                                                    aria-live="polite"
+                                                >
+                                                    {quantity}
+                                                </span>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={increase}
+                                                    aria-label="Increase quantity"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" className="product-add">
+                                            Add to cart
                                         </button>
+                                    </form>
+                                </>
+                            ) : (
+                                <>
+                                    <h1>{name}</h1>
 
-                                        <span
-                                            id="product-qty-value"
-                                            aria-live="polite"
-                                        >
-                                            {quantity}
-                                        </span>
+                                    <h2>{price}</h2>
 
-                                        <button
-                                            type="button"
-                                            onClick={increase}
-                                            aria-label="Increase quantity"
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <button type="submit" className="product-add">
-                                    Add to cart
-                                </button>
-                            </form>
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: description,
+                                        }}
+                                    />
+                                </>
+                            )}
 
                             <div className="product-meta">
                                 <p>
@@ -228,21 +244,23 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </div>
             </section>
 
-            <section className="product-features">
-                <div className="container">
-                    <div className="product-features-list">
-                        {features.map((item) => (
-                            <article
-                                key={item.title}
-                                className="product-feature"
-                            >
-                                <h3>{item.title}</h3>
-                                <p>{item.text}</p>
-                            </article>
-                        ))}
+            {product.type === "simple" && (
+                <section className="product-features">
+                    <div className="container">
+                        <div className="product-features-list">
+                            {features.map((item) => (
+                                <article
+                                    key={item.title}
+                                    className="product-feature"
+                                >
+                                    <h3>{item.title}</h3>
+                                    <p>{item.text}</p>
+                                </article>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
         </main>
     );
 }
