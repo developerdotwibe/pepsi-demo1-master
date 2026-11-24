@@ -143,6 +143,7 @@ export default function ProductSection() {
                 {products.map((product) => (
                     <div className="product-col1" key={product.id}>
                         <div className="product-img">
+                            <div className="product-card-glow"></div>
                             <Image
                                 src={product.image}
                                 alt={product.title}

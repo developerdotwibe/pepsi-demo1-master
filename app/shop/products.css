@@ -56,8 +56,8 @@
     transition: transform 0.3s ease;
 
 
-    /* background: #0c0c14;
-    border: 1px solid rgba(255, 255, 255, 0.12); */
+    background: #0c0c14;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .product-card-img-wrap {
@@ -107,7 +107,7 @@
 }
 
 .products-card:hover .product-card-can {
-    animation: bottleLift 1.8s ease-in-out infinite alternate;
+    animation: bottleLift5 1.8s ease-in-out infinite alternate;
     /* filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.5)); */
 }
 

@@ -138,6 +138,21 @@
     left:12px;
 }
 
+.product-card-glow {
+       pointer-events: none;
+    z-index: 1;
+    background: #fff;
+    border-radius: 16px;
+    width: 95%;
+    height: 95%;
+    transition: transform .4s cubic-bezier(.2, .8, .2, 1), filter .4s, background .4s;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+}
+
+
 @media (max-width: 1199px) {
     .product-list-wrapp .prd-filter-row h3 {
         font-size: clamp(14px, 1.5vw, 18px);
