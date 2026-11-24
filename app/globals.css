@@ -306,9 +306,10 @@ body {
   position: relative;
   z-index: 1;
   display: block;
-  width: 100%;
-  max-width: 230px;
-  max-height: 280px;
+  /* width: 100%;
+  max-width: 200px;
+  max-height: 240px; */
+  /* max-height: 280px; */
   height: auto;
   object-fit: contain;
   transform-origin: 50% 100%;
@@ -317,6 +318,11 @@ body {
     all 0.65s cubic-bezier(0.22, 1, 0.36, 1),
     filter 0.5s ease;
   margin-inline: auto;
+/* added... */
+width: 100%;
+    max-width: 85%;
+    height: 280px;
+    max-height: inherit;
 }
 .product-list-wrapp .product-grid  h4 {
     color: #fff;
@@ -536,7 +542,8 @@ body {
   }
 
   50% {
-    transform: translate3d(0, -20px, 0) scale(1.04);
+        /* transform: translate3d(0, -20px, 0) scale(1.04); */
+    transform: translate3d(0, -7px, 0) scale(1.04);
   }
 
   100% {

@@ -50,9 +50,14 @@
     align-items: center;
     text-align: center;
     position: relative;
-    padding: 30px 20px 20px;
+    /* padding: 30px 20px 20px; */
+    padding: 20px 20px 40px;
     border-radius: 16px;
     transition: transform 0.3s ease;
+
+
+    background: #0c0c14;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .product-card-img-wrap {
@@ -66,28 +71,30 @@
 
 .product-card-glow {
     position: absolute;
-    width: 290px;
-    height: 290px;
-
-    border-radius: 50%;
+    /* width: 290px;
+    height: 290px; */
+    width: 95%;
+    height: 95%;
+    border-radius: 16px;
     /* background: radial-gradient(circle, rgba(0, 30, 255, 0.8) 0%, rgba(0, 15, 190, 0.45) 45%, transparent 70%); */
-    filter: blur(8px);
+    /* filter: blur(8px); */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: 1;
-    background: radial-gradient(circle, #ffffff 0%, #ffffff 45%, #ffffff 65%, rgb(255, 255, 255) 80%);
+    background: #fff;
+    /* background: radial-gradient(circle, #ffffff 0%, #ffffff 45%, #ffffff 65%, rgb(255, 255, 255) 80%); */
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease, background 0.4s ease;
-        box-shadow: 0 0 20px 15px rgba(255, 255, 255, 0.5), 0 0 45px 35px rgba(255, 255, 255, 0.3), 0 0 80px 55px rgba(255, 255, 255, 0.15);
+        /* box-shadow: 0 0 20px 15px rgba(255, 255, 255, 0.5), 0 0 45px 35px rgba(255, 255, 255, 0.3), 0 0 80px 55px rgba(255, 255, 255, 0.15); */
 }
 
 .products-card:hover .product-card-glow {
     transform: translate(-50%, -50%) scale(1.05);
-    filter: blur(8px);
+    filter: blur(1px);
     /* background: radial-gradient(circle, rgba(0, 45, 255, 0.95) 0%, rgba(0, 20, 220, 0.6) 45%, transparent 70%); */
-    background: radial-gradient(circle, #ffffff 0%, #ffffff 45%, #fffffffc 65%, rgba(255, 255, 255, 0.999) 80%);
-     box-shadow: 0 0 20px 15px rgba(255, 255, 255, 0.5), 0 0 45px 35px rgba(255, 255, 255, 0.3), 0 0 80px 55px rgba(255, 255, 255, 0.15);
+    /* background: radial-gradient(circle, #ffffff 0%, #ffffff 45%, #fffffffc 65%, rgba(255, 255, 255, 0.999) 80%); */
+     /* box-shadow: 0 0 20px 15px rgba(255, 255, 255, 0.5), 0 0 45px 35px rgba(255, 255, 255, 0.3), 0 0 80px 55px rgba(255, 255, 255, 0.15); */
 }
 
 .product-card-can {
@@ -101,7 +108,7 @@
 
 .products-card:hover .product-card-can {
     animation: bottleLift 1.8s ease-in-out infinite alternate;
-    filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.5));
+    /* filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.5)); */
 }
 
 .product-card-info {
@@ -110,6 +117,7 @@
     flex-direction: column;
     align-items: center;
     margin-top: 24px;
+    flex: 1;
 }
 
 .product-card-info h3 {
@@ -126,17 +134,29 @@
     line-height: 1.25;
 }
 
-.product-card-info p {
-    font-size: 15px;
-    color: #ffffff;
-    font-family: "Inter", sans-serif;
-    margin: 0 0 24px;
+.product-card-info p+p {
+     color: #ff5a66;
+    /* opacity: .95; */
     max-width: 270px;
     min-height: 44px;
+    margin: 0 0 24px;
+    font-family: Inter, sans-serif;
+    font-size: 32px;
     line-height: 1.5;
-    opacity: 0.95;
+    font-weight: 900;
+}
+.product-card-info p:has(+ p){
+margin: 12px 0 24px;
+    font-family: Inter, sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+        /* color: #f28906; */
+        color: #ffd39c;
 }
 
+.product-card-info .products-card-btn {
+    margin-top: auto;
+}
 .products-card-btn {
     color: #ffffff;
     text-transform: uppercase;
