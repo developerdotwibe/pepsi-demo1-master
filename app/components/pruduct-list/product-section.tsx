@@ -14,9 +14,17 @@ interface Product {
     id: number;
     title: string;
     slug: string;
+    type: "simple" | "variable";
     link: string;
     image: string;
-    "wck-meta"?: {subtitle_product?: string[]};
+    price: string;
+    price_range?: {
+        min: string;
+        max: string;
+    } | null;
+    "wck-meta"?: {
+        subtitle_product?: string[];
+    };
 }
 
 interface ProductsApiResponse {
@@ -157,8 +165,14 @@ export default function ProductSection() {
                         <div className="product-cont">
                             <h4>{product.title}</h4>
                             <p>{product["wck-meta"]?.subtitle_product?.[0] || ""}</p>
-
-                            <Link href="/shop" className="prdt-btn">FIND OUT MORE</Link>
+                            <h3 className="product-price">
+                                {product.type === "variable" && product.price_range
+                                    ? `$${Number(product.price_range.min).toFixed(2)} - $${Number(product.price_range.max).toFixed(2)}`
+                                    : `$${Number(product.price).toFixed(2)}`}
+                            </h3>
+                            <Link href="/shop" className="prdt-btn">
+                                FIND OUT MORE
+                            </Link>
                         </div>
                     </div>
                 ))}
