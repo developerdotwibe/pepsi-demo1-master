@@ -16,6 +16,7 @@ export interface ApiProductDetail {
     type: "simple" | "variable";
     short_description: string;
     featured_image: string;
+    nutritional_info?: string | null;
     price: string;
     price_range?: {
         min: string;
@@ -70,6 +71,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const decrease = () => setQuantity((q) => Math.max(MIN_QTY, q - 1));
     const increase = () => setQuantity((q) => q + 1);
     const [selectedPackaging, setSelectedPackaging] = useState("");
+    const [showNutritionPopup, setShowNutritionPopup] = useState(false);
     
     const selectedVariation = product.variations?.find(
         (variation) =>
@@ -231,9 +233,15 @@ useEffect(() => {
                                         }}
                                     />
 
-                                    <Link href="#nutrition">
-                                        Nutrition Information
-                                    </Link>
+                                    {product.nutritional_info && (
+                                        <button
+                                            type="button"
+                                            className="nutrition-link"
+                                            onClick={() => setShowNutritionPopup(true)}
+                                        >
+                                            Nutrition Information
+                                        </button>
+                                    )}
 
                                     <form
                                         className="product-cart"
@@ -343,6 +351,35 @@ useEffect(() => {
                         </div>
                     </div>
                 </section>
+            )}
+
+            {showNutritionPopup && product.nutritional_info && (
+                <div
+                    className="nutrition-popup-overlay"
+                    onClick={() => setShowNutritionPopup(false)}
+                >
+                    <div
+                        className="nutrition-popup"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            className="nutrition-popup-close"
+                            onClick={() => setShowNutritionPopup(false)}
+                            aria-label="Close nutrition information"
+                        >
+                            &times;
+                        </button>
+
+                        <Image
+                            src={product.nutritional_info}
+                            alt={`${name} nutritional information`}
+                            width={500}
+                            height={500}
+                            className="nutrition-popup-image"
+                        />
+                    </div>
+                </div>
             )}
         </main>
     );
