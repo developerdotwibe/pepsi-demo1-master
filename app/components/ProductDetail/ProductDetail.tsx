@@ -66,6 +66,14 @@ const features = [
 
 const MIN_QTY = 1;
 
+const decodeHtmlEntities = (value: string) => {
+    if (typeof window === "undefined") return value;
+
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = value;
+    return textarea.value.trim();
+};
+
 export default function ProductDetail({ product }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(MIN_QTY);
     const decrease = () => setQuantity((q) => Math.max(MIN_QTY, q - 1));
@@ -73,33 +81,18 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const [selectedPackaging, setSelectedPackaging] = useState("");
     const [showNutritionPopup, setShowNutritionPopup] = useState(false);
     
-    const selectedVariation = product.variations?.find(
-        (variation) =>
-            variation.attributes.attribute_packaging === selectedPackaging
-    );
+    const selectedVariation = product.variations?.find((variation) => variation.attributes.attribute_packaging === selectedPackaging);
 
     // Dynamic product values
     const name = product.title;
-
-    const variant =
-        product.attributes.find((attribute) =>
-            attribute.name.toLowerCase().includes("packaging")
-        )?.options?.[0]?.label || "";
-
+    const variant = product.attributes.find((attribute) => attribute.name.toLowerCase().includes("packaging"))?.options?.[0]?.label || "";
     const price = selectedVariation ? `$${Number(selectedVariation.display_price).toFixed(2)}` : product.type === "variable" && product.price_range ? `$${Number(product.price_range.min).toFixed(2)} - $${Number(product.price_range.max).toFixed(2)}` : product.price ? `$${Number(product.price).toFixed(2)}` : "";
     const image = selectedVariation?.image || product.featured_image || "/images/bottle.png";
     const description = product.short_description || "";
-
-    const packagingOptions =
-        product.attributes.find((attribute) =>
-            attribute.name.toLowerCase().includes("packaging")
-        )?.options || [];
-
-    // Static values
-    const category = "Carbonated Soft Drinks";
-    const brand = "[BRAND NAME]";
-
+    const packagingOptions = product.attributes.find((attribute) => attribute.name.toLowerCase().includes("packaging"))?.options || [];
     const productRef = useRef<HTMLElement>(null);
+    const categories = product.categories || [];
+    const firstCategory = categories[0]?.name ? decodeHtmlEntities(categories[0].name) : "";
 
 useEffect(() => {
     if (!productRef.current) return;
@@ -218,7 +211,7 @@ useEffect(() => {
                         <div className="product-info">
                             {product.type === "simple" ? (
                                 <>
-                                    <h4>{category}</h4>
+                                    <h4>{firstCategory}</h4>
 
                                     <h1>
                                         {name}
@@ -326,8 +319,12 @@ useEffect(() => {
                             <div className="product-meta">
                                 <p>
                                     Categories:{" "}
-                                    <Link href="/shop">{category}</Link>,{" "}
-                                    <Link href="/shop">{brand}</Link>
+                                    {categories.map((category, index) => (
+                                        <span key={category.id}>
+                                            {decodeHtmlEntities(category.name)}
+                                            {index < categories.length - 1 && ", "}
+                                        </span>
+                                    ))}
                                 </p>
                             </div>
                         </div>
