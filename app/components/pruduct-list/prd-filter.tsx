@@ -184,93 +184,211 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
         navigateToShop(currentValues);
     };
 
+    const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+    const toggleFilter = (filter: string) => {
+        setActiveFilter((prev) => (prev === filter ? null : filter));
+    };
+
     return (
-        <div className="prd-filter-row row">
-            {/* Search */}
-            <div className="prft-col1 col-md-2">
-                <h3>Search</h3>
-                <div className="prd-filter">
-                    <input
-                        type="text"
-                        className="prd-filter-select"
-                        placeholder="Search products..."
-                        value={currentValues.search}
-                        onChange={(e) => handleUpdate("search", e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                handleSearch();
-                            }
-                        }}
-                    />
-                    <button
-                        className="search-btn"
-                        type="button"
-                        aria-label="Search"
-                        onClick={handleSearch}
-                    >
-                        <Image
-                            src="/images/icons/search-icon.svg"
-                            alt="Search Icon"
-                            width={19}
-                            height={19}
-                            sizes="(max-width: 768px) 80vw, 25vw"
-                            style={{ objectFit: "contain" }}
+        <>
+            <div className="prd-filter-row row desk">
+                {/* Search */}
+                <div className="prft-col1 col-md-2">
+                    <h3>Search</h3>
+                    <div className="prd-filter">
+                        <input
+                            type="text"
+                            className="prd-filter-select"
+                            placeholder="Search products..."
+                            value={currentValues.search}
+                            onChange={(e) => handleUpdate("search", e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    handleSearch();
+                                }
+                            }}
                         />
+                        <button
+                            className="search-btn"
+                            type="button"
+                            aria-label="Search"
+                            onClick={handleSearch}
+                        >
+                            <Image
+                                src="/images/icons/search-icon.svg"
+                                alt="Search Icon"
+                                width={19}
+                                height={19}
+                                sizes="(max-width: 768px) 80vw, 25vw"
+                                style={{ objectFit: "contain" }}
+                            />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Brand */}
+                <div className="prft-col1 col-md-2">
+                    <h3>Brand</h3>
+                    <div className="filter-col">
+                        <AnimatedDropdown
+                            options={brandOptions}
+                            value={currentValues.brand}
+                            onChange={(val) => handleUpdate("brand", val)}
+                            placeholder="All Brands"
+                        />
+                    </div>
+                </div>
+
+                {/* Type */}
+                <div className="prft-col1 col-md-2">
+                    <h3>Type</h3>
+                    <div className="filter-col">
+                        <AnimatedDropdown
+                            options={typeOptions}
+                            value={currentValues.type}
+                            onChange={(val) => handleUpdate("type", val)}
+                            placeholder="All Types"
+                        />
+                    </div>
+                </div>
+
+                {/* Serving Size */}
+                <div className="prft-col1 col-md-2">
+                    <h3>Serving Size</h3>
+                    <div className="filter-col">
+                        <AnimatedDropdown
+                            options={sizeOptions}
+                            value={currentValues.size}
+                            onChange={(val) => handleUpdate("size", val)}
+                            placeholder="All Serving Sizes"
+                        />
+                    </div>
+                </div>
+
+                {/* Sort By - Static */}
+                <div className="prft-col1 col-md-2">
+                    <h3>Sort By</h3>
+                    <div className="filter-col">
+                        <AnimatedDropdown
+                            options={SORT_OPTIONS}
+                            value={currentValues.sort}
+                            onChange={(val) => handleUpdate("sort", val)}
+                            placeholder="Price High to Low"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="prd-filter-row row mob">
+                {/* Search */}
+                <div className="prft-col1 col-md-2">
+                    <h3>Search</h3>
+                    <div className="prd-filter">
+                        <input
+                            type="text"
+                            className="prd-filter-select"
+                            placeholder="Search products..."
+                            value={currentValues.search}
+                            onChange={(e) => handleUpdate("search", e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") handleSearch();
+                            }}
+                        />
+                        <button
+                            className="search-btn"
+                            type="button"
+                            aria-label="Search"
+                            onClick={handleSearch}
+                        >
+                            <Image
+                                src="/images/icons/search-icon.svg"
+                                alt="Search Icon"
+                                width={19}
+                                height={19}
+                                sizes="(max-width: 768px) 80vw, 25vw"
+                                style={{ objectFit: "contain" }}
+                            />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Brand */}
+                <div className="prft-col1 col-md-2">
+                    <button
+                        className="filter-heading"
+                        onClick={() => toggleFilter("brand")}
+                        aria-expanded={activeFilter === "brand"}
+                    >
+                        Brand
                     </button>
+                    <div className={`filter-col ${activeFilter === "brand" ? "active" : ""}`}>
+                        <AnimatedDropdown
+                            options={brandOptions}
+                            value={currentValues.brand}
+                            onChange={(val) => handleUpdate("brand", val)}
+                            placeholder="All Brands"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            {/* Brand */}
-            <div className="prft-col1 col-md-2">
-                <h3>Brand</h3>
-                <div className="filter-col">
-                    <AnimatedDropdown
-                        options={brandOptions}
-                        value={currentValues.brand}
-                        onChange={(val) => handleUpdate("brand", val)}
-                        placeholder="All Brands"
-                    />
+                {/* Type */}
+                <div className="prft-col1 col-md-2">
+                    <button
+                        className="filter-heading"
+                        onClick={() => toggleFilter("type")}
+                        aria-expanded={activeFilter === "type"}
+                    >
+                        Type
+                    </button>
+                    <div className={`filter-col ${activeFilter === "type" ? "active" : ""}`}>
+                        <AnimatedDropdown
+                            options={typeOptions}
+                            value={currentValues.type}
+                            onChange={(val) => handleUpdate("type", val)}
+                            placeholder="All Types"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            {/* Type */}
-            <div className="prft-col1 col-md-2">
-                <h3>Type</h3>
-                <div className="filter-col">
-                    <AnimatedDropdown
-                        options={typeOptions}
-                        value={currentValues.type}
-                        onChange={(val) => handleUpdate("type", val)}
-                        placeholder="All Types"
-                    />
+                {/* Serving Size */}
+                <div className="prft-col1 col-md-2">
+                    <button
+                        className="filter-heading"
+                        onClick={() => toggleFilter("size")}
+                        aria-expanded={activeFilter === "size"}
+                    >
+                        Serving Size
+                    </button>
+                    <div className={`filter-col ${activeFilter === "size" ? "active" : ""}`}>
+                        <AnimatedDropdown
+                            options={sizeOptions}
+                            value={currentValues.size}
+                            onChange={(val) => handleUpdate("size", val)}
+                            placeholder="All Serving Sizes"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            {/* Serving Size */}
-            <div className="prft-col1 col-md-2">
-                <h3>Serving Size</h3>
-                <div className="filter-col">
-                    <AnimatedDropdown
-                        options={sizeOptions}
-                        value={currentValues.size}
-                        onChange={(val) => handleUpdate("size", val)}
-                        placeholder="All Serving Sizes"
-                    />
+                {/* Sort By */}
+                <div className="prft-col1 col-md-2">
+                    <button
+                        className="filter-heading"
+                        onClick={() => toggleFilter("sort")}
+                        aria-expanded={activeFilter === "sort"}
+                    >
+                        Sort By
+                    </button>
+                    <div className={`filter-col ${activeFilter === "sort" ? "active" : ""}`}>
+                        <AnimatedDropdown
+                            options={SORT_OPTIONS}
+                            value={currentValues.sort}
+                            onChange={(val) => handleUpdate("sort", val)}
+                            placeholder="Price High to Low"
+                        />
+                    </div>
                 </div>
             </div>
-
-            {/* Sort By - Static */}
-            <div className="prft-col1 col-md-2">
-                <h3>Sort By</h3>
-                <div className="filter-col">
-                    <AnimatedDropdown
-                        options={SORT_OPTIONS}
-                        value={currentValues.sort}
-                        onChange={(val) => handleUpdate("sort", val)}
-                        placeholder="Price High to Low"
-                    />
-                </div>
-            </div>
-        </div>
+        </>
     );
 }
