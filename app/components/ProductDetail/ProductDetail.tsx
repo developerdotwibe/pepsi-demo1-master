@@ -99,63 +99,96 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
     const productRef = useRef<HTMLElement>(null);
 
-    useEffect(() => {
-        if (!productRef.current) return;
+useEffect(() => {
+    if (!productRef.current) return;
 
-        const ctx = gsap.context(() => {
-            // Breadcrumb animation
-            gsap.from(".delivery-breadcrumb", {
-                y: 20,
-                opacity: 0,
-                duration: 0.7,
-                ease: "power2.out",
+    const ctx = gsap.context(() => {
+        const root = productRef.current!;
+
+        // One shared reveal for every element
+        const reveal = (
+            els: HTMLElement[],
+            from: gsap.TweenVars = { y: 50 },
+            step = 0.1
+        ) => {
+            els.forEach((el, i) => {
+                // Inline tags (like <a>) ignore transforms, so make them inline-block
+                if (getComputedStyle(el).display === "inline") {
+                    el.style.display = "inline-block";
+                }
+
+                const savedTransition = el.style.transition;
+                el.style.transition = "none"; // stop CSS transitions fighting GSAP
+
+                gsap.fromTo(
+                    el,
+                    { ...from, autoAlpha: 0 },
+                    {
+                        x: 0,
+                        y: 0,
+                        scale: 1,
+                        autoAlpha: 1,
+                        duration: 0.8,
+                        ease: "power3.out",
+                        delay: i * step,
+                        overwrite: "auto",
+                        immediateRender: false, // don't hide before the trigger is ready
+                        onComplete: () => {
+                            gsap.set(el, { clearProps: "transform,opacity,visibility" });
+                            el.style.transition = savedTransition; // restore hover effects
+                        },
+                        scrollTrigger: {
+                            trigger: el,
+                            start: "top 92%",
+                            once: true, // animate once, never hide again
+                        },
+                    }
+                );
             });
+        };
 
-            // Product image animation
-            gsap.from(".product-image", {
-                x: -70,
-                opacity: 0,
-                scale: 0.92,
-                duration: 1.2,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: ".product-main",
-                    start: "top 80%",
-                    toggleActions: "play none none reverse",
-                },
-            });
+        // Breadcrumb: plays on load
+        gsap.fromTo(
+            ".delivery-breadcrumb",
+            { y: 20, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.7, ease: "power2.out" }
+        );
 
-            // Product information animation
-            gsap.from(".product-info > *", {
-                x: 60,
-                opacity: 0,
-                duration: 0.8,
-                stagger: 0.12,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: ".product-info",
-                    start: "top 80%",
-                    toggleActions: "play none none reverse",
-                },
-            });
+        // Product image
+        reveal(
+            Array.from(root.querySelectorAll<HTMLElement>(".product-image")),
+            { x: -70, scale: 0.92 }
+        );
 
-            // Product features animation
-            gsap.from(".product-feature", {
-                y: 60,
-                opacity: 0,
-                duration: 0.8,
-                stagger: 0.2,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: ".product-features",
-                    start: "top 80%",
-                    toggleActions: "play none none reverse",
-                },
-            });
-        }, productRef);
+        // Product info: direct children + every link/button inside (includes the <a> above the cart form)
+        const infoRoot = root.querySelector(".product-info");
+        if (infoRoot) {
+            const infoItems = new Set<HTMLElement>([
+                ...Array.from(infoRoot.children as HTMLCollectionOf<HTMLElement>),
+                ...Array.from(infoRoot.querySelectorAll<HTMLElement>("a, button")),
+            ]);
+            reveal(Array.from(infoItems), { x: 60 }, 0.08);
+        }
 
-        return () => ctx.revert();
-    }, []);
+        // Product features
+        reveal(
+            Array.from(root.querySelectorAll<HTMLElement>(".product-feature")),
+            { y: 60 },
+            0.15
+        );
+    }, productRef);
+
+    // Recalculate trigger positions once images and fonts finish loading
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener("load", refresh);
+    const t = setTimeout(refresh, 500);
+
+    return () => {
+        window.removeEventListener("load", refresh);
+        clearTimeout(t);
+        ctx.revert();
+    };
+}, []);
 
     return (
         <main className="product-page" ref={productRef}>
