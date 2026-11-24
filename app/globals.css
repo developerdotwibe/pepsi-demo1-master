@@ -360,6 +360,18 @@ width: 100%;
     flex-direction: column;
     flex: 1;
 }
+
+.product-list-wrapp .product-grid .product-col1 .product-cont h3{
+      color: #ff5a66;
+    max-width: 270px;
+    min-height: 44px;
+    margin: 0 auto 24px;
+    font-family: Inter, sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1.5;
+}
+
 .product-list-wrapp .product-grid p {
     /* font-size: 16px; */
 
