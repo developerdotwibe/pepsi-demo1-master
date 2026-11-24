@@ -6,33 +6,22 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import "./header.css";
 
-const MENU = [
-    { label: "Home", href: "/" },
-    { label: "Products", href: "/shop", dropdown: true },
-    { label: "Delivery/Pick up", href: "/delivery" },
-    { label: "Contact", href: "/contact" },
-    { label: "About", href: "/about-us" },
-];
-
-// Dummy product list for the "Products" dropdown: swap the names, links and images for real ones
-const PRODUCTS = [
-    { name: "Pepsi", href: "/shop" },
-    { name: "Diet Pepsi", href: "/shop" },
-    { name: "Pepsi Zero Sugar", href: "/shop" },
-    { name: "Pepsi Wild Cherry", href: "/shop" },
-    { name: "Pepsi Prebiotic Cola", href: "/shop" },
-    { name: "Mountain Dew", href: "/shop" },
-    { name: "7UP", href: "/shop" },
-    { name: "Mug Root Beer", href: "/shop" },
-];
-const PRODUCT_IMAGE = "/images/pepsi-can1.png";
-
 const SOCIALS = [
     { icon: "search-icon.svg", label: "Search", isSearch: true },
     { icon: "cart-icon.svg", label: "Cart" },
     { icon: "fb-icon.svg", label: "Facebook" },
     { icon: "insta-icon.svg", label: "Instagram" },
 ];
+
+interface ApiMenuItem {
+    id: number;
+    title: string;
+    url: string;
+    parent: string;
+    order: number;
+    image_id: number | null;
+    image: string | null;
+}
 
 export default function Header() {
     const [open, setOpen] = useState(false);
@@ -41,6 +30,29 @@ export default function Header() {
     const searchInputRef = useRef<HTMLInputElement | null>(null);
     const pathname = usePathname();
     const router = useRouter();
+    const [menuItems, setMenuItems] = useState<ApiMenuItem[]>([]);
+
+    useEffect(() => {
+        const fetchMenu = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/menu/top`
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch menu");
+                }
+
+                const data: ApiMenuItem[] = await response.json();
+
+                setMenuItems(data);
+            } catch (error) {
+                console.error("Error fetching header menu:", error);
+            }
+        };
+
+        fetchMenu();
+    }, []);
 
     // Close the menu and search bar when the page changes
     useEffect(() => {
@@ -87,6 +99,14 @@ export default function Header() {
             window.removeEventListener("resize", onResize);
         };
     }, [open]);
+
+    const mainMenu = menuItems
+        .filter((item) => item.parent === "0")
+        .sort((a, b) => a.order - b.order);
+
+    const productMenu = menuItems
+        .filter((item) => item.parent === "107")
+        .sort((a, b) => a.order - b.order);
 
     return (
         <header className="header">
@@ -153,7 +173,7 @@ export default function Header() {
                                 <li
                                     key={s.icon}
                                     className={s.isSearch ? "search-item" : undefined}
-                                    style={{ ["--i" as string]: MENU.length + i } as React.CSSProperties}
+                                    style={{["--i" as string]: mainMenu.length + i} as React.CSSProperties}
                                 >
                                     {s.isSearch ? (
                                         <button
@@ -210,56 +230,85 @@ export default function Header() {
 
                         <div className="menu-items">
                             <ul>
-                                {MENU.map((item, i) => (
-                                    <li
-                                        key={item.href}
-                                        className={item.dropdown ? "has-dropdown" : undefined}
-                                        style={{ ["--i" as string]: i } as React.CSSProperties}
-                                    >
-                                        <div className="dd-trigger">
-                                            <Link
-                                                href={item.href}
-                                                className={pathname === item.href ? "active" : ""}
-                                                onClick={(e) => {
-                                                    if (item.href === "/contact") {
-                                                        e.preventDefault();
-                                                        window.dispatchEvent(new Event("open-contact-popup"));
-                                                    }
+                                {mainMenu.map((item, i) => {
+                                    const href =
+                                        item.id === 107
+                                            ? "/shop"
+                                            : item.url.replace(/\/$/, "") || "/";
 
-                                                    setOpen(false);
-                                                }}
-                                            >
-                                                {item.label}
-                                            </Link>
-                                        </div>
+                                    const isProducts = item.id === 107;
+                                    const isContact = item.id === 105;
 
-                                        {/* Full-width dropdown: opens on hover / keyboard focus (desktop only) */}
-                                        {item.dropdown && (
-                                            <div className="products-dropdown">
-                                                <div className="container">
-                                                    <ul className="products-list">
-                                                        {PRODUCTS.map((p) => (
-                                                            <li key={p.name}>
-                                                                <Link href={p.href} onClick={() => setOpen(false)}>
-                                                                    <span className="product-thumb">
-                                                                        <Image
-                                                                            src={PRODUCT_IMAGE}
-                                                                            alt=""
-                                                                            width={56}
-                                                                            height={56}
-                                                                            style={{ objectFit: "contain" }}
-                                                                        />
-                                                                    </span>
-                                                                    <span className="product-name">{p.name}</span>
-                                                                </Link>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
+                                    return (
+                                        <li
+                                            key={item.id}
+                                            className={isProducts ? "has-dropdown" : undefined}
+                                            style={{ ["--i" as string]: i } as React.CSSProperties}
+                                        >
+                                            <div className="dd-trigger">
+                                                <Link
+                                                    href={href}
+                                                    className={pathname === href ? "active" : ""}
+                                                    onClick={(e) => {
+                                                        if (isContact) {
+                                                            e.preventDefault();
+                                                            window.dispatchEvent(
+                                                                new Event("open-contact-popup")
+                                                            );
+                                                        }
+
+                                                        setOpen(false);
+                                                    }}
+                                                >
+                                                    {item.title.replace(/&amp;/g, "&")}
+                                                </Link>
                                             </div>
-                                        )}
-                                    </li>
-                                ))}
+
+                                            {isProducts && (
+                                                <div className="products-dropdown">
+                                                    <div className="container">
+                                                        <ul className="products-list">
+                                                            {productMenu.map((product) => {
+                                                                const productHref =
+                                                                    product.url.replace(/\/$/, "") || "/shop";
+
+                                                                return (
+                                                                    <li key={product.id}>
+                                                                        <Link
+                                                                            href={productHref}
+                                                                            onClick={() => setOpen(false)}
+                                                                        >
+                                                                            <span className="product-thumb">
+                                                                                {product.image && (
+                                                                                    <Image
+                                                                                        src={product.image}
+                                                                                        alt={product.title}
+                                                                                        width={56}
+                                                                                        height={56}
+                                                                                        style={{
+                                                                                            objectFit: "contain",
+                                                                                        }}
+                                                                                    />
+                                                                                )}
+                                                                            </span>
+
+                                                                            <span className="product-name">
+                                                                                {product.title.replace(
+                                                                                    /&amp;/g,
+                                                                                    "&"
+                                                                                )}
+                                                                            </span>
+                                                                        </Link>
+                                                                    </li>
+                                                                );
+                                                            })}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
 
@@ -269,7 +318,7 @@ export default function Header() {
                                     <li
                                         key={s.icon}
                                         className={s.isSearch ? "search-item" : undefined}
-                                        style={{ ["--i" as string]: MENU.length + i } as React.CSSProperties}
+                                        style={{["--i" as string]: mainMenu.length + i} as React.CSSProperties}
                                     >
                                         {s.isSearch ? (
                                             <button
