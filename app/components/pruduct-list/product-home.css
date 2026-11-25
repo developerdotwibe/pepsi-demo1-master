@@ -344,7 +344,7 @@
 }
 
 .product-list-wrapp .prd-filter-row .prft-col1:has(.search-btn) {
-    width: 103%;
+    width: calc(103% - 8px);
 }
 
 .product-list-wrapp .prd-filter-row {
