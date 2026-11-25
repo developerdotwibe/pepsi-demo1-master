@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { cartRequest } from "@/app/lib/cart-api";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./ProductDetail.css";
@@ -80,8 +81,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const increase = () => setQuantity((q) => q + 1);
     const [selectedPackaging, setSelectedPackaging] = useState("");
     const [showNutritionPopup, setShowNutritionPopup] = useState(false);
-    
     const selectedVariation = product.variations?.find((variation) => variation.attributes.attribute_packaging === selectedPackaging);
+    const [addingToCart, setAddingToCart] = useState(false);
+    const [cartMessage, setCartMessage] = useState("");
+    const [cartError, setCartError] = useState(false);
 
     // Dynamic product values
     const name = product.title;
@@ -94,96 +97,133 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const categories = product.categories || [];
     const firstCategory = categories[0]?.name ? decodeHtmlEntities(categories[0].name) : "";
 
-useEffect(() => {
-    if (!productRef.current) return;
-
-    const ctx = gsap.context(() => {
-        const root = productRef.current!;
-
-        // One shared reveal for every element
-        const reveal = (
-            els: HTMLElement[],
-            from: gsap.TweenVars = { y: 50 },
-            step = 0.1
-        ) => {
-            els.forEach((el, i) => {
-                // Inline tags (like <a>) ignore transforms, so make them inline-block
-                if (getComputedStyle(el).display === "inline") {
-                    el.style.display = "inline-block";
-                }
-
-                const savedTransition = el.style.transition;
-                el.style.transition = "none"; // stop CSS transitions fighting GSAP
-
-                gsap.fromTo(
-                    el,
-                    { ...from, autoAlpha: 0 },
-                    {
-                        x: 0,
-                        y: 0,
-                        scale: 1,
-                        autoAlpha: 1,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        delay: i * step,
-                        overwrite: "auto",
-                        immediateRender: false, // don't hide before the trigger is ready
-                        onComplete: () => {
-                            gsap.set(el, { clearProps: "transform,opacity,visibility" });
-                            el.style.transition = savedTransition; // restore hover effects
-                        },
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 92%",
-                            once: true, // animate once, never hide again
-                        },
-                    }
-                );
-            });
-        };
-
-        // Breadcrumb: plays on load
-        gsap.fromTo(
-            ".delivery-breadcrumb",
-            { y: 20, autoAlpha: 0 },
-            { y: 0, autoAlpha: 1, duration: 0.7, ease: "power2.out" }
-        );
-
-        // Product image
-        reveal(
-            Array.from(root.querySelectorAll<HTMLElement>(".product-image")),
-            { x: -70, scale: 0.92 }
-        );
-
-        // Product info: direct children + every link/button inside (includes the <a> above the cart form)
-        const infoRoot = root.querySelector(".product-info");
-        if (infoRoot) {
-            const infoItems = new Set<HTMLElement>([
-                ...Array.from(infoRoot.children as HTMLCollectionOf<HTMLElement>),
-                ...Array.from(infoRoot.querySelectorAll<HTMLElement>("a, button")),
-            ]);
-            reveal(Array.from(infoItems), { x: 60 }, 0.08);
+    const handleAddToCart = async () => {
+        setCartMessage("");
+        setCartError(false);
+        if (product.type === "variable" && !selectedPackaging) {
+            setCartError(true);
+            setCartMessage("Please select a packaging option.");
+            return;
         }
-
-        // Product features
-        reveal(
-            Array.from(root.querySelectorAll<HTMLElement>(".product-feature")),
-            { y: 60 },
-            0.15
-        );
-    }, productRef);
-
-    // Recalculate trigger positions once images and fonts finish loading
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener("load", refresh);
-    const t = setTimeout(refresh, 500);
-
-    return () => {
-        window.removeEventListener("load", refresh);
-        clearTimeout(t);
-        ctx.revert();
+        setAddingToCart(true);
+        try {
+            const selectedVariationData = product.variations?.find(
+                (variation) => variation.attributes.attribute_packaging === selectedPackaging);
+            const payload: Record < string, unknown > = {
+                id: product.id,
+                quantity,
+            };
+            if (product.type === "variable") {
+                if (!selectedVariationData) {
+                    throw new Error("Selected packaging option is unavailable.");
+                }
+                payload.variation = [{
+                    attribute: "pa_packaging",
+                    value: selectedPackaging,
+                }, ];
+            }
+            await cartRequest("cart/add-item", "POST", payload);
+            setCartMessage("Product added to cart successfully.");
+        }
+        catch (error) {
+            setCartError(true);
+            setCartMessage(error instanceof Error ? error.message : "Unable to add product to cart.");
+        }
+        finally {
+            setAddingToCart(false);
+        }
     };
-}, []);
+
+    useEffect(() => {
+        if (!productRef.current) return;
+
+        const ctx = gsap.context(() => {
+            const root = productRef.current!;
+
+            // One shared reveal for every element
+            const reveal = (
+                els: HTMLElement[],
+                from: gsap.TweenVars = { y: 50 },
+                step = 0.1
+            ) => {
+                els.forEach((el, i) => {
+                    // Inline tags (like <a>) ignore transforms, so make them inline-block
+                    if (getComputedStyle(el).display === "inline") {
+                        el.style.display = "inline-block";
+                    }
+
+                    const savedTransition = el.style.transition;
+                    el.style.transition = "none"; // stop CSS transitions fighting GSAP
+
+                    gsap.fromTo(
+                        el,
+                        { ...from, autoAlpha: 0 },
+                        {
+                            x: 0,
+                            y: 0,
+                            scale: 1,
+                            autoAlpha: 1,
+                            duration: 0.8,
+                            ease: "power3.out",
+                            delay: i * step,
+                            overwrite: "auto",
+                            immediateRender: false, // don't hide before the trigger is ready
+                            onComplete: () => {
+                                gsap.set(el, { clearProps: "transform,opacity,visibility" });
+                                el.style.transition = savedTransition; // restore hover effects
+                            },
+                            scrollTrigger: {
+                                trigger: el,
+                                start: "top 92%",
+                                once: true, // animate once, never hide again
+                            },
+                        }
+                    );
+                });
+            };
+
+            // Breadcrumb: plays on load
+            gsap.fromTo(
+                ".delivery-breadcrumb",
+                { y: 20, autoAlpha: 0 },
+                { y: 0, autoAlpha: 1, duration: 0.7, ease: "power2.out" }
+            );
+
+            // Product image
+            reveal(
+                Array.from(root.querySelectorAll<HTMLElement>(".product-image")),
+                { x: -70, scale: 0.92 }
+            );
+
+            // Product info: direct children + every link/button inside (includes the <a> above the cart form)
+            const infoRoot = root.querySelector(".product-info");
+            if (infoRoot) {
+                const infoItems = new Set<HTMLElement>([
+                    ...Array.from(infoRoot.children as HTMLCollectionOf<HTMLElement>),
+                    ...Array.from(infoRoot.querySelectorAll<HTMLElement>("a, button")),
+                ]);
+                reveal(Array.from(infoItems), { x: 60 }, 0.08);
+            }
+
+            // Product features
+            reveal(
+                Array.from(root.querySelectorAll<HTMLElement>(".product-feature")),
+                { y: 60 },
+                0.15
+            );
+        }, productRef);
+
+        // Recalculate trigger positions once images and fonts finish loading
+        const refresh = () => ScrollTrigger.refresh();
+        window.addEventListener("load", refresh);
+        const t = setTimeout(refresh, 500);
+
+        return () => {
+            window.removeEventListener("load", refresh);
+            clearTimeout(t);
+            ctx.revert();
+        };
+    }, []);
 
     return (
         <main className="product-page" ref={productRef}>
@@ -238,7 +278,10 @@ useEffect(() => {
 
                                     <form
                                         className="product-cart"
-                                        onSubmit={(e) => e.preventDefault()}
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            handleAddToCart();
+                                        }}
                                     >
                                         <div className="product-qty-wrap">
                                             <label htmlFor="product-qty-value">
@@ -272,8 +315,12 @@ useEffect(() => {
                                             </div>
                                         </div>
 
-                                        <button type="submit" className="product-add">
-                                            Add to cart
+                                        <button
+                                            type="submit"
+                                            className="product-add"
+                                            disabled={addingToCart}
+                                        >
+                                            {addingToCart ? "Adding..." : "Add to cart"}
                                         </button>
                                     </form>
                                 </>
@@ -311,6 +358,51 @@ useEffect(() => {
                                                     </option>
                                                 ))}
                                             </select>
+
+                                            <form
+                                                className="product-cart"
+                                                onSubmit={(e) => {
+                                                    e.preventDefault();
+                                                    handleAddToCart();
+                                                }}
+                                            >
+                                                <div className="product-qty-wrap">
+                                                    <label htmlFor="variable-product-qty">
+                                                        Quantity
+                                                    </label>
+
+                                                    <div className="product-qty">
+                                                        <button
+                                                            type="button"
+                                                            onClick={decrease}
+                                                            disabled={quantity <= MIN_QTY}
+                                                            aria-label="Decrease quantity"
+                                                        >
+                                                            &minus;
+                                                        </button>
+
+                                                        <span id="variable-product-qty" aria-live="polite">
+                                                            {quantity}
+                                                        </span>
+
+                                                        <button
+                                                            type="button"
+                                                            onClick={increase}
+                                                            aria-label="Increase quantity"
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="submit"
+                                                    className="product-add"
+                                                    disabled={addingToCart}
+                                                >
+                                                    {addingToCart ? "Adding..." : "Add to cart"}
+                                                </button>
+                                            </form>
                                         </div>
                                     )}
                                 </>
@@ -327,6 +419,15 @@ useEffect(() => {
                                     ))}
                                 </p>
                             </div>
+
+                            {cartMessage && (
+                                <p
+                                    className={cartError ? "cart-message error" : "cart-message success"}
+                                    role="status"
+                                >
+                                    {cartMessage}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

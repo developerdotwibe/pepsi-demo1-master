@@ -11,6 +11,7 @@ const SOCIALS = [
     { icon: "cart-icon.svg", label: "Cart" },
     { icon: "fb-icon.svg", label: "Facebook" },
     { icon: "insta-icon.svg", label: "Instagram" },
+    { icon: "login-icon.svg", label: "Login" },
 ];
 
 interface ApiMenuItem {
@@ -193,7 +194,16 @@ export default function Header() {
                                             />
                                         </button>
                                     ) : (
-                                        <Link href="" aria-label={s.label}>
+                                        <Link
+                                            href={
+                                                s.label === "Login"
+                                                    ? "/my-account"
+                                                    : s.label === "Cart"
+                                                    ? "/cart"
+                                                    : "#"
+                                            }
+                                            aria-label={s.label}
+                                        >
                                             <Image
                                                 src={`/images/icons/${s.icon}`}
                                                 alt={s.label}
@@ -338,7 +348,10 @@ export default function Header() {
                                                 />
                                             </button>
                                         ) : (
-                                            <Link href="" aria-label={s.label}>
+                                            <Link
+                                                href={s.label === "Login" ? "/my-account" : "#"}
+                                                aria-label={s.label}
+                                            >
                                                 <Image
                                                     src={`/images/icons/${s.icon}`}
                                                     alt={s.label}
