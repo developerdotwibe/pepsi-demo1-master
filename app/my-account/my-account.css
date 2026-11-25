@@ -89,6 +89,32 @@
   color: #004d8a;
 }
 
+.user-profile .profile-details {
+  margin-top: 30px;
+}
+
+.user-profile .profile-field {
+  padding: 15px 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.user-profile .profile-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #777;
+  font-size: 14px;
+}
+
+.user-profile .profile-field p {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.user-profile .logout-btn {
+  margin-top: 25px;
+}
+
 @media (max-width: 576px) {
   .my-account-page {
     padding: 50px 15px;

@@ -195,7 +195,13 @@ export default function Header() {
                                         </button>
                                     ) : (
                                         <Link
-                                            href={s.label === "Login" ? "/my-account" : "#"}
+                                            href={
+                                                s.label === "Login"
+                                                    ? "/my-account"
+                                                    : s.label === "Cart"
+                                                    ? "/cart"
+                                                    : "#"
+                                            }
                                             aria-label={s.label}
                                         >
                                             <Image
