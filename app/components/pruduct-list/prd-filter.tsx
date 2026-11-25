@@ -184,11 +184,8 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
         navigateToShop(currentValues);
     };
 
-    const [activeFilter, setActiveFilter] = useState<string | null>(null);
-
-    const toggleFilter = (filter: string) => {
-        setActiveFilter((prev) => (prev === filter ? null : filter));
-    };
+    const [showFilters, setShowFilters] = useState(false);
+    const [activeFilter, setActiveFilter] = useState("brand");
 
     return (
         <>
@@ -281,6 +278,7 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
             </div>
 
             <div className="prd-filter-row row mob">
+
                 {/* Search */}
                 <div className="prft-col1 col-md-2">
                     <h3>Search</h3>
@@ -313,80 +311,143 @@ export default function PrdFilter({ values, onChange }: PrdFilterProps) {
                     </div>
                 </div>
 
-                {/* Brand */}
-                <div className="prft-col1 col-md-2">
+                {/* Filter Button */}
+                <div className="filter-main-wrapper">
                     <button
-                        className="filter-heading"
-                        onClick={() => toggleFilter("brand")}
-                        aria-expanded={activeFilter === "brand"}
-                    >
-                        Brand
+                        className="filter-main-btn"
+                        onClick={() => setShowFilters(prev => !prev)}
+                        aria-expanded={showFilters}
+                    >   <Image
+                                src="/images/icons/filter-icon.svg"
+                                alt="Search Icon"
+                                width={19}
+                                height={19}
+                                sizes="(max-width: 768px) 80vw, 25vw"
+                                style={{ objectFit: "contain" }}
+                            />
+                        <span>Filter</span>
+                        <span>{showFilters ? "−" : "+"}</span>
                     </button>
-                    <div className={`filter-col ${activeFilter === "brand" ? "active" : ""}`}>
-                        <AnimatedDropdown
-                            options={brandOptions}
-                            value={currentValues.brand}
-                            onChange={(val) => handleUpdate("brand", val)}
-                            placeholder="All Brands"
-                        />
-                    </div>
-                </div>
 
-                {/* Type */}
-                <div className="prft-col1 col-md-2">
-                    <button
-                        className="filter-heading"
-                        onClick={() => toggleFilter("type")}
-                        aria-expanded={activeFilter === "type"}
-                    >
-                        Type
-                    </button>
-                    <div className={`filter-col ${activeFilter === "type" ? "active" : ""}`}>
-                        <AnimatedDropdown
-                            options={typeOptions}
-                            value={currentValues.type}
-                            onChange={(val) => handleUpdate("type", val)}
-                            placeholder="All Types"
-                        />
-                    </div>
-                </div>
+                    {/* Tab Panel */}
+                    {showFilters && (
+                        <div className="filter-tab-panel">
 
-                {/* Serving Size */}
-                <div className="prft-col1 col-md-2">
-                    <button
-                        className="filter-heading"
-                        onClick={() => toggleFilter("size")}
-                        aria-expanded={activeFilter === "size"}
-                    >
-                        Serving Size
-                    </button>
-                    <div className={`filter-col ${activeFilter === "size" ? "active" : ""}`}>
-                        <AnimatedDropdown
-                            options={sizeOptions}
-                            value={currentValues.size}
-                            onChange={(val) => handleUpdate("size", val)}
-                            placeholder="All Serving Sizes"
-                        />
-                    </div>
-                </div>
+                            {/* Left Side - Tabs */}
+                            <div className="filter-tab-buttons">
 
-                {/* Sort By */}
-                <div className="prft-col1 col-md-2">
-                    <button
-                        className="filter-heading"
-                        onClick={() => toggleFilter("sort")}
-                        aria-expanded={activeFilter === "sort"}
-                    >
-                        Sort By
-                    </button>
-                    <div className={`filter-col ${activeFilter === "sort" ? "active" : ""}`}>
-                        <AnimatedDropdown
-                            options={SORT_OPTIONS}
-                            value={currentValues.sort}
-                            onChange={(val) => handleUpdate("sort", val)}
-                            placeholder="Price High to Low"
-                        />
-                    </div>
+                                <button
+                                    className={activeFilter === "brand" ? "active" : ""}
+                                    onClick={() => setActiveFilter("brand")}
+                                >
+                                    Brand
+                                </button>
+
+                                <button
+                                    className={activeFilter === "type" ? "active" : ""}
+                                    onClick={() => setActiveFilter("type")}
+                                >
+                                    Type
+                                </button>
+
+                                <button
+                                    className={activeFilter === "size" ? "active" : ""}
+                                    onClick={() => setActiveFilter("size")}
+                                >
+                                    Serving Size
+                                </button>
+
+                                <button
+                                    className={activeFilter === "sort" ? "active" : ""}
+                                    onClick={() => setActiveFilter("sort")}
+                                >
+                                    Sort By
+                                </button>
+
+                            </div>
+
+                            {/* Right Side - Tab Content */}
+                            <div className="filter-tab-content">
+
+                                {activeFilter === "brand" && (
+                                    <div>
+                                        <h4>Brand</h4>
+                                        <div className="filter-options-list">
+                                            {brandOptions.map((option) => (
+                                                <label key={option.value} className="filter-option">
+                                                    <input
+                                                        type="radio"
+                                                        name="brand"
+                                                        checked={currentValues.brand === option.value}
+                                                        onChange={() => handleUpdate("brand", option.value)}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeFilter === "type" && (
+                                    <div>
+                                        <h4>Type</h4>
+                                        <div className="filter-options-list">
+                                            {typeOptions.map((option) => (
+                                                <label key={option.value} className="filter-option">
+                                                    <input
+                                                        type="radio"
+                                                        name="type"
+                                                        checked={currentValues.type === option.value}
+                                                        onChange={() => handleUpdate("type", option.value)}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeFilter === "size" && (
+                                    <div>
+                                        <h4>Serving Size</h4>
+                                        <div className="filter-options-list">
+                                            {sizeOptions.map((option) => (
+                                                <label key={option.value} className="filter-option">
+                                                    <input
+                                                        type="radio"
+                                                        name="size"
+                                                        checked={currentValues.size === option.value}
+                                                        onChange={() => handleUpdate("size", option.value)}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeFilter === "sort" && (
+                                    <div>
+                                        <h4>Sort By</h4>
+                                        <div className="filter-options-list">
+                                            {SORT_OPTIONS.map((option) => (
+                                                <label key={option.value} className="filter-option">
+                                                    <input
+                                                        type="radio"
+                                                        name="sort"
+                                                        checked={currentValues.sort === option.value}
+                                                        onChange={() => handleUpdate("sort", option.value)}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </>

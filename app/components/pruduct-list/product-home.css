@@ -170,6 +170,100 @@
 }
 
 
+.product-list-wrapp .prd-filter-row  .filter-main-btn {
+    width: 100%;
+    height: 55px;
+    cursor: pointer;
+    background: #0000fe;
+    border: 1px solid #0000fe;
+    border-radius: 9px;
+    font-size: 0;
+}
+.product-list-wrapp .prd-filter-row .filter-main-btn img {
+    height: 100%;
+    width: 100%;
+    max-width: 25px;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper {
+    width: 55px;
+    margin-top: auto;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    background: #1c1b1b;
+    border: 1px solid #3c3c3c;
+    border-radius: 11px;
+    display: grid;
+    grid-template-columns: 32% 65%;
+    gap: 2%;
+    min-height: 40vh;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel .filter-tab-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    row-gap: 2px;
+    border-radius: 8px 0 0 8px;
+    overflow: hidden;
+    border-right: 1px solid #3c3c3c;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel button {
+    background: #1c1b1b;
+    border: 0;
+    color: #fff;
+    text-align: left;
+    padding: 24px 19px;
+    font-family: pepsifont;
+    font-weight: 600;
+    border-bottom: 1px solid #3c3c3c;
+    cursor: pointer;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel .filter-tab-content h4 {
+    display: none;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel .filter-tab-content .filter-options-list {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 15px 12px;
+    gap: 0.85rem;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel .filter-tab-content .filter-options-list .filter-option {
+    width: 100%;
+    padding: 15px 10px;
+    border: 1px solid #3c3c3c;
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel .filter-tab-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel .filter-tab-content .filter-options-list .filter-option span {
+    padding-left: 0;
+    color: #fff;
+    font-size: 15px;
+}
+
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel button:hover, .product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel button.active {
+    background: #ff5a66;
+}
+.product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel .filter-tab-content .filter-options-list .filter-option input[type="radio"] {
+    position: absolute;
+    left: 6px;
+    -webkit-appearance: none;
+    border: 1px solid #3c3c3c;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    top: 13px;
+    opacity: 0;
+}
+
 @media (max-width: 1199px) {
     .product-list-wrapp .prd-filter-row h3 {
         font-size: clamp(14px, 1.5vw, 18px);
@@ -228,7 +322,7 @@
     }
 
 
-    .product-list-wrapp .prd-filter-row .prft-col1 .filter-heading {
+    /* .product-list-wrapp .prd-filter-row .prft-col1 .filter-heading {
     background: #0000fe;
     border: 2.2px solid #fff;
     border-radius: 19px;
@@ -237,24 +331,25 @@
     color: #fff;
     font-size: 16px;
     width: 100%;
-}
+    } */
 
-.product-list-wrapp .prd-filter-row .prft-col1 .filter-col {
+/* .product-list-wrapp .prd-filter-row .prft-col1 .filter-col {
     position: absolute;
     opacity: 0;
     visibility: hidden;
-}
+} */
 
 .product-list-wrapp .prd-filter-row .prft-col1 {
     width: 47%;
 }
 
 .product-list-wrapp .prd-filter-row .prft-col1:has(.search-btn) {
-    width: 100%;
+    width: 103%;
 }
 
 .product-list-wrapp .prd-filter-row {
-    gap: 4%;
+    display: grid;
+    grid-template-columns: 1fr 55px;
     row-gap: 1rem;
 }
 
@@ -265,4 +360,15 @@
     /* .product-list-wrapp .prd-filter-row .prft-col1 {
         width: 100%;
     } */
+
+    .product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel .filter-tab-content .filter-options-list {
+        grid-template-columns: 1fr;
+    }
+    .product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel button {
+        padding: 22px 15px;
+        font-size: 12px;
+    }
+    .product-list-wrapp .prd-filter-row .filter-main-wrapper .filter-tab-panel {
+        grid-template-columns: 37% 60%;
+    }
 }
