@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import UserProfile from "./UserProfile";
+import { initializeCustomerCart } from "@/app/lib/cart-api";
 
 interface User {
   id: number;
@@ -54,6 +55,7 @@ export default function LoginForm() {
       }
 
       try {
+        await initializeCustomerCart(token);
         await fetchProfile(token);
       } catch (error) {
         sessionStorage.removeItem("auth_token");
@@ -97,6 +99,9 @@ export default function LoginForm() {
       // Save authentication token
       sessionStorage.setItem("auth_token", data.token);
 
+      // Initialize WooCommerce customer cart
+      await initializeCustomerCart(data.token);
+
       // Fetch profile details
       await fetchProfile(data.token);
 
@@ -121,6 +126,8 @@ export default function LoginForm() {
 
   const handleLogout = () => {
     sessionStorage.removeItem("auth_token");
+    sessionStorage.removeItem("woocommerce_cart_token");
+
     setUser(null);
     setUsername("");
     setPassword("");
