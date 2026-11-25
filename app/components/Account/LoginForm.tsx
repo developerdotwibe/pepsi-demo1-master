@@ -47,7 +47,7 @@ export default function LoginForm() {
   // Check existing login session when page loads
   useEffect(() => {
     const checkLogin = async () => {
-      const token = sessionStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
 
       if (!token) {
         setCheckingProfile(false);
@@ -97,7 +97,7 @@ export default function LoginForm() {
       }
 
       // Save authentication token
-      sessionStorage.setItem("auth_token", data.token);
+      localStorage.setItem("auth_token", data.token);
 
       // Initialize WooCommerce customer cart
       await initializeCustomerCart(data.token);
@@ -110,7 +110,7 @@ export default function LoginForm() {
 
       setPassword("");
     } catch (error) {
-      sessionStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_token");
 
       setMessage(
         error instanceof Error
@@ -125,8 +125,8 @@ export default function LoginForm() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("auth_token");
-    sessionStorage.removeItem("woocommerce_cart_token");
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("woocommerce_cart_token");
 
     setUser(null);
     setUsername("");

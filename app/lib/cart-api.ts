@@ -2,6 +2,10 @@ const CART_API = "/api/cart";
 const CART_TOKEN_KEY = "woocommerce_cart_token";
 
 export async function initializeCustomerCart(authToken: string) {
+  const existingToken = localStorage.getItem(CART_TOKEN_KEY);
+  if (existingToken) {
+    return existingToken;
+  }
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/cart-session`,
     {
@@ -20,7 +24,7 @@ export async function initializeCustomerCart(authToken: string) {
     throw new Error(data.message || "Unable to initialize customer cart.");
   }
 
-  sessionStorage.setItem(CART_TOKEN_KEY, data.cart_token);
+  localStorage.setItem(CART_TOKEN_KEY, data.cart_token);
 
   return data.cart_token;
 }
@@ -32,7 +36,7 @@ export async function cartRequest(
 ) {
   const token =
     typeof window !== "undefined"
-      ? sessionStorage.getItem(CART_TOKEN_KEY)
+      ? localStorage.getItem(CART_TOKEN_KEY)
       : null;
 
   const headers: HeadersInit = {
@@ -54,7 +58,7 @@ export async function cartRequest(
   const newToken = response.headers.get("Cart-Token");
 
   if (newToken && typeof window !== "undefined") {
-    sessionStorage.setItem(CART_TOKEN_KEY, newToken);
+    localStorage.setItem(CART_TOKEN_KEY, newToken);
   }
 
   const data = await response.json();
