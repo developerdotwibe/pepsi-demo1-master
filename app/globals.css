@@ -904,6 +904,10 @@ html.lenis, html.lenis body {
   overflow: hidden;
 }
 
+.cart-content {
+    color: #fff;
+}
+
 @media (max-width: 1440px) {
   .container {width: 94%;}
   .pepsi-scroll-section .hero-content-outer {width:90%;}
