@@ -39,7 +39,7 @@ p{
   margin-bottom: 32px;
   font-size: 15px;
   font-weight: 700;
-      font-family: Inter, sans-serif;
+      font-family: PepsiFont, sans-serif;
 }
 
 .delivery-breadcrumb a {
@@ -57,7 +57,7 @@ p{
 }
 
 .delivery-breadcrumb span:last-child {
-  color: var(--color-link);
+  color: #1a32ea;
 }
 
 /* ===== Title ===== */
@@ -70,7 +70,7 @@ p{
   font-weight: 700;
   line-height: 1.1;
   text-transform: uppercase;
-  font-family: "Unbounded", sans-serif; 
+  font-family: pepsifont; 
    color: var(--color-accent);
 }
 
@@ -91,29 +91,28 @@ p{
 
 /* ===== Pill heading ===== */
  .delivery-btn {
-border: 2px solid var(--color-accent);
-    color: var(--color-accent);
-    /* letter-spacing: .02em; */
-    text-transform: uppercase;
-    border-radius: 999px;
-    justify-content: center;
-    align-items: center;
-    margin: 1.25rem 0 40px;
-    padding: 10px 24px;
-    background: transparent;
-    font-size: 18px;
-    font-weight: 700;
-    display: inline-flex;
-    font-family: "Unbounded", sans-serif;
-    cursor: pointer;
-    transition: all .3s ease-in-out;
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+  /* letter-spacing: .02em; */
+  text-transform: uppercase;
+  border-radius: 999px;
+  justify-content: center;
+  align-items: center;
+  margin: 1.25rem 0 40px;
+  padding: 10px 24px;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 700;
+  display: inline-flex;
+  font-family: "Unbounded", sans-serif;
+  /* cursor: pointer; */
+  transition: all .3s ease-in-out;
 }
 
- .delivery-btn:hover{
-color:#fff;
-background: var(--color-accent);
-
- }
+/* .delivery-btn:hover{
+  color:#fff;
+  background: var(--color-accent);
+} */
 
 /* ===== 3 columns (flexbox) ===== */
 .delivery-columns {
@@ -143,6 +142,7 @@ background: var(--color-accent);
     font-size: 17px;
     font-weight: 700;
     letter-spacing: normal;
+    font-family: PepsiFont, sans-serif;
 }
 
 .delivery-column p {
