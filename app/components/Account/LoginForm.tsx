@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import UserProfile from "./UserProfile";
-import { initializeCustomerCart } from "@/app/lib/cart-api";
+import {initializeCustomerCart, mergeGuestCart} from "@/app/lib/cart-api";
 
 interface User {
   id: number;
@@ -55,11 +55,11 @@ export default function LoginForm() {
       }
 
       try {
-        await initializeCustomerCart(token);
+        const customerCartToken = await initializeCustomerCart(token);
+        localStorage.setItem("woocommerce_cart_token", customerCartToken);
         await fetchProfile(token);
       } catch (error) {
-        sessionStorage.removeItem("auth_token");
-
+        localStorage.removeItem("auth_token");
         console.error("Profile verification failed:", error);
       } finally {
         setCheckingProfile(false);
@@ -96,11 +96,21 @@ export default function LoginForm() {
         throw new Error(data.message || "Invalid username or password.");
       }
 
+      // Capture guest cart token before initializing customer cart
+      const guestCartToken = localStorage.getItem("woocommerce_cart_token");
+
       // Save authentication token
       localStorage.setItem("auth_token", data.token);
 
-      // Initialize WooCommerce customer cart
-      await initializeCustomerCart(data.token);
+      // Get the logged-in customer's WooCommerce cart token
+      const customerCartToken = await initializeCustomerCart(data.token);
+
+      // Merge guest cart products into the customer's existing cart
+      if (guestCartToken && guestCartToken !== customerCartToken) {
+        await mergeGuestCart(guestCartToken, customerCartToken);
+      } else {
+        localStorage.setItem("woocommerce_cart_token", customerCartToken);
+      }
 
       // Fetch profile details
       await fetchProfile(data.token);

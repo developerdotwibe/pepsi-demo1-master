@@ -1,11 +1,59 @@
+
 const CART_API = "/api/cart";
 const CART_TOKEN_KEY = "woocommerce_cart_token";
 
-export async function initializeCustomerCart(authToken: string) {
-  const existingToken = localStorage.getItem(CART_TOKEN_KEY);
-  if (existingToken) {
-    return existingToken;
+async function fetchCartWithToken(
+  endpoint: string,
+  method: string,
+  token?: string,
+  body?: Record<string, unknown>
+) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Cart-Token"] = token;
   }
+
+  const response = await fetch(`${CART_API}/${endpoint}`, {
+    method,
+    headers,
+    ...(body ? { body: JSON.stringify(body) } : {}),
+    cache: "no-store",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to process cart request.");
+  }
+
+  return {
+    data,
+    token: response.headers.get("Cart-Token") || token || null,
+  };
+}
+
+// Create a guest cart token if one doesn't exist.
+export async function ensureCartToken() {
+  let token = localStorage.getItem(CART_TOKEN_KEY);
+
+  if (token) return token;
+
+  const result = await fetchCartWithToken("cart", "GET");
+
+  if (!result.token) {
+    throw new Error("Unable to initialize guest cart.");
+  }
+
+  localStorage.setItem(CART_TOKEN_KEY, result.token);
+
+  return result.token;
+}
+
+// Always obtain the customer cart token after login.
+export async function initializeCustomerCart(authToken: string) {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/cart-session`,
     {
@@ -24,48 +72,68 @@ export async function initializeCustomerCart(authToken: string) {
     throw new Error(data.message || "Unable to initialize customer cart.");
   }
 
-  localStorage.setItem(CART_TOKEN_KEY, data.cart_token);
-
-  return data.cart_token;
+  return data.cart_token as string;
 }
 
+// Merge guest products into the existing customer cart.
+export async function mergeGuestCart(
+  guestToken: string,
+  customerToken: string
+) {
+  const guestResult = await fetchCartWithToken(
+    "cart",
+    "GET",
+    guestToken
+  );
+
+  const guestItems = guestResult.data.items || [];
+
+  const customerResult = await fetchCartWithToken(
+    "cart",
+    "GET",
+    customerToken
+  );
+
+  let activeToken = customerResult.token || customerToken;
+
+  for (const item of guestItems) {
+    const result = await fetchCartWithToken(
+      "cart/add-item",
+      "POST",
+      activeToken,
+      {
+        id: item.id,
+        quantity: item.quantity,
+        ...(item.variation?.length
+          ? { variation: item.variation }
+          : {}),
+      }
+    );
+
+    activeToken = result.token || activeToken;
+  }
+
+  localStorage.setItem(CART_TOKEN_KEY, activeToken);
+}
+
+// Normal cart operations.
 export async function cartRequest(
   endpoint = "cart",
   method = "GET",
   body?: Record<string, unknown>
 ) {
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem(CART_TOKEN_KEY)
-      : null;
+  const token = await ensureCartToken();
 
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-
-  if (token) {
-    headers["Cart-Token"] = token;
-  }
-
-  const response = await fetch(`${CART_API}/${endpoint}`, {
+  const result = await fetchCartWithToken(
+    endpoint,
     method,
-    credentials: "include",
-    headers,
-    ...(body ? { body: JSON.stringify(body) } : {}),
-    cache: "no-store",
-  });
+    token,
+    body
+  );
 
-  const newToken = response.headers.get("Cart-Token");
-
-  if (newToken && typeof window !== "undefined") {
-    localStorage.setItem(CART_TOKEN_KEY, newToken);
+  if (result.token) {
+    localStorage.setItem(CART_TOKEN_KEY, result.token);
   }
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Unable to process cart request.");
-  }
-
-  return data;
+  return result.data;
 }
