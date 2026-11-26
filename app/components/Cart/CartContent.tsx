@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { cartRequest } from "@/app/lib/cart-api";
@@ -49,7 +50,9 @@ interface CartData {
 }
 
 export default function CartContent() {
+  const router = useRouter();
   const [cart, setCart] = useState<CartData | null>(null);
+  const [deliveryOption, setDeliveryOption] = useState("delivery");
   const [loading, setLoading] = useState(true);
   const [updatingKey, setUpdatingKey] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -72,6 +75,13 @@ export default function CartContent() {
 
   useEffect(() => {
     loadCart();
+  }, []);
+
+  useEffect(() => {
+    const savedOption = localStorage.getItem("delivery_or_pickup");
+    if (savedOption === "delivery" || savedOption === "pickup") {
+      setDeliveryOption(savedOption);
+    }
   }, []);
 
   const formatPrice = (value: string, minorUnit: number, prefix: string, suffix: string) => {
@@ -282,9 +292,7 @@ export default function CartContent() {
           <button
             type="button"
             className="cart-checkout-btn"
-            onClick={() => {
-              window.location.href = "/checkout";
-            }}
+            onClick={() => router.push("/checkout")}
           >
             Proceed to Checkout
           </button>
@@ -293,6 +301,38 @@ export default function CartContent() {
             Continue Shopping
           </Link>
         </aside>
+
+        <div className="delivery-options">
+          <h3>How would you like to get your order?</h3>
+
+          <label>
+            <input
+              type="radio"
+              name="delivery_or_pickup"
+              value="delivery"
+              checked={deliveryOption === "delivery"}
+              onChange={() => {
+                setDeliveryOption("delivery");
+                localStorage.setItem("delivery_or_pickup", "delivery");
+              }}
+            />
+            Free delivery to my door with a 3 item minimum purchase.
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="delivery_or_pickup"
+              value="pickup"
+              checked={deliveryOption === "pickup"}
+              onChange={() => {
+                setDeliveryOption("pickup");
+                localStorage.setItem("delivery_or_pickup", "pickup");
+              }}
+            />
+            Warehouse pick up at Pepsi Cola CU Bottling Co. in Champaign.
+          </label>
+        </div>
       </div>
     </div>
   );
