@@ -124,14 +124,39 @@ export default function LoginForm() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("woocommerce_cart_token");
+  const handleLogout = async () => {
+    const token = localStorage.getItem("auth_token");
 
-    setUser(null);
-    setUsername("");
-    setPassword("");
-    setMessage("");
+    try {
+      if (token) {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/logout`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          console.error("Logout API failed:", data.message);
+        }
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("woocommerce_cart_token");
+
+      setUser(null);
+      setUsername("");
+      setPassword("");
+      setMessage("");
+    }
   };
 
   if (checkingProfile) {
