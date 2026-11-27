@@ -298,6 +298,18 @@
   text-decoration: underline;
 }
 
+.cart-pickup-banner {
+    width: 100%;
+    margin-top: 15px;
+    padding: 15px 20px;
+    background-color: #ffe5e5;
+    color: #c62828;
+    border: 1px solid #f5b5b5;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
 @media (max-width: 480px) {
   .cart-coupon-input {
     flex-direction: column;

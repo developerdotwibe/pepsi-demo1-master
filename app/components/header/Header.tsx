@@ -24,7 +24,17 @@ interface ApiMenuItem {
     image: string | null;
 }
 
-export default function Header() {
+interface HeaderProps {
+    generalSettings?: {
+        site_logo_new?: string[];
+        mobile_logo_new?: string[];
+        header_text_new?: string[];
+        facebooklink?: string[];
+        linkedinlink?: string[];
+    };
+}
+
+export default function Header({ generalSettings }: HeaderProps) {
     const [open, setOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [query, setQuery] = useState("");
@@ -32,6 +42,11 @@ export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
     const [menuItems, setMenuItems] = useState<ApiMenuItem[]>([]);
+    const headerText = generalSettings?.header_text_new?.[0] || "";
+    const logoId = generalSettings?.site_logo_new?.[0];
+    const logoUrl = logoId
+        ? `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace("/wp-json/custom/v1", "")}/wp-content/uploads/`
+        : "/images/icons/header-logo.svg";
 
     useEffect(() => {
         const fetchMenu = async () => {

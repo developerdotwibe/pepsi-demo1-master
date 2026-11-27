@@ -13,42 +13,59 @@ import type { HomePageData } from "./types/home";
 
 async function HomeContent() {
     let data: HomePageData | null = null;
+    let generalSettings: any = null;
 
     try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/page/home`,
-            { cache: "no-store" }
-        );
+        const [homeResponse, settingsResponse] = await Promise.all([
+            fetch(
+                `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/page/home`,
+                { cache: "no-store" }
+            ),
+            fetch(
+                `${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/page/general-settings`,
+                { cache: "no-store" }
+            ),
+        ]);
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch homepage data");
+        if (homeResponse.ok) {
+            data = await homeResponse.json();
         }
 
-        data = await response.json();
+        if (settingsResponse.ok) {
+            generalSettings = await settingsResponse.json();
+        }
     } catch (error) {
         console.error("Error fetching homepage data:", error);
     }
 
     const meta = data?.["wck-meta"] || {};
+    const settingsMeta = generalSettings?.["wck-meta"] || {};
 
     return (
         <>
             <SmoothScroll />
             <PageLoader />
             <main>
-                <Header />
+                <Header
+                    generalSettings={settingsMeta}
+                />
+
                 <PepsiHero
                     bannerText={meta.banner_text_new?.[0] || ""}
                 />
+
                 <ProductListHome />
+
                 <HomeCont1
                     description={meta.hmdescription?.[0] || ""}
                     videoUrl={meta.description_backgroundurl?.[0] || ""}
                 />
+
                 <HomeCont2
                     aboutContent={meta.home_about_content?.[0] || ""}
                     backgroundImage={meta.home_about_backgroundimg?.[0] || ""}
                 />
+
                 <FloatingCart count={2} />
                 <Footer />
             </main>

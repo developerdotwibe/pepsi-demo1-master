@@ -65,7 +65,11 @@ interface CartData {
   };
 }
 
-export default function CartContent() {
+interface CartContentProps {
+    pickupMessage: string;
+}
+
+export default function CartContent({ pickupMessage }: CartContentProps) {
   const router = useRouter();
   const [cart, setCart] = useState<CartData | null>(null);
   const [deliveryOption, setDeliveryOption] = useState("delivery");
@@ -499,6 +503,12 @@ export default function CartContent() {
             />
             Warehouse pick up at Pepsi Cola CU Bottling Co. in Champaign.
           </label>
+
+          {deliveryOption === "pickup" && pickupMessage && (
+              <div className="cart-pickup-banner">
+                  {decodeHtmlEntities(pickupMessage)}
+              </div>
+          )}
         </div>
       </div>
     </div>
