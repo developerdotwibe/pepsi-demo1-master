@@ -32,6 +32,7 @@ export interface ApiProductDetail {
         name: string;
         slug: string;
         is_variation: boolean;
+        is_taxonomy?: boolean;
         options: {
             slug: string;
             label: string;
@@ -39,9 +40,7 @@ export interface ApiProductDetail {
     }[];
     variations: {
         variation_id: number;
-        attributes: {
-            attribute_packaging: string;
-        };
+        attributes: Record<string, string>;
         regular_price: number;
         display_price: number;
         stock_status: string;
@@ -79,20 +78,34 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(MIN_QTY);
     const decrease = () => setQuantity((q) => Math.max(MIN_QTY, q - 1));
     const increase = () => setQuantity((q) => q + 1);
-    const [selectedPackaging, setSelectedPackaging] = useState("");
     const [showNutritionPopup, setShowNutritionPopup] = useState(false);
-    const selectedVariation = product.variations?.find((variation) => variation.attributes.attribute_packaging === selectedPackaging);
+    const [selectedAttributes, setSelectedAttributes] = useState < Record < string, string > > ({});
+    const variationAttributes = product.attributes.filter((attribute) => attribute.is_variation);
+    const getVariationAttributeKey = (attribute: ApiProductDetail["attributes"][number]) => {
+        if (attribute.is_taxonomy) {
+            return `attribute_${attribute.slug}`;
+        }
+        const normalizedName = attribute.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+        return `attribute_${normalizedName}`;
+    };
+    const selectedVariation = product.variations?.find((variation) => variationAttributes.every((attribute) => {
+        const selectedSlug = selectedAttributes[attribute.slug];
+        if (!selectedSlug) return false;
+        const selectedOption = attribute.options.find((option) => option.slug === selectedSlug);
+        if (!selectedOption) return false;
+        const expectedValue = attribute.is_taxonomy ? selectedOption.slug : selectedOption.label;
+        return (variation.attributes[getVariationAttributeKey(attribute)] === expectedValue);
+    }));
     const [addingToCart, setAddingToCart] = useState(false);
     const [cartMessage, setCartMessage] = useState("");
     const [cartError, setCartError] = useState(false);
 
     // Dynamic product values
     const name = product.title;
-    const variant = product.attributes.find((attribute) => attribute.name.toLowerCase().includes("packaging"))?.options?.[0]?.label || "";
+    const variant = "";
     const price = selectedVariation ? `$${Number(selectedVariation.display_price).toFixed(2)}` : product.type === "variable" && product.price_range ? `$${Number(product.price_range.min).toFixed(2)} - $${Number(product.price_range.max).toFixed(2)}` : product.price ? `$${Number(product.price).toFixed(2)}` : "";
     const image = selectedVariation?.image || product.featured_image || "/images/bottle.png";
     const description = product.short_description || "";
-    const packagingOptions = product.attributes.find((attribute) => attribute.name.toLowerCase().includes("packaging"))?.options || [];
     const productRef = useRef<HTMLElement>(null);
     const categories = product.categories || [];
     const firstCategory = categories[0]?.name ? decodeHtmlEntities(categories[0].name) : "";
@@ -100,28 +113,37 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const handleAddToCart = async () => {
         setCartMessage("");
         setCartError(false);
-        if (product.type === "variable" && !selectedPackaging) {
+        if (product.type === "variable" && variationAttributes.some((attribute) => !selectedAttributes[attribute.slug])) {
             setCartError(true);
-            setCartMessage("Please select a packaging option.");
+            setCartMessage("Please select all product options.");
             return;
         }
         setAddingToCart(true);
         try {
-            const selectedVariationData = product.variations?.find(
-                (variation) => variation.attributes.attribute_packaging === selectedPackaging);
             const payload: Record < string, unknown > = {
                 id: product.id,
                 quantity,
             };
             if (product.type === "variable") {
-                if (!selectedVariationData) {
-                    throw new Error("Selected packaging option is unavailable.");
+                const variationPayload = variationAttributes.map((attribute) => {
+                    const selectedOption = attribute.options.find((option) => option.slug === selectedAttributes[attribute.slug]);
+                    if (!selectedOption) {
+                        throw new Error(`Please select ${attribute.name}.`);
+                    }
+                    return {
+                        attribute: attribute.is_taxonomy ? attribute.slug : attribute.name,
+                        value: attribute.is_taxonomy ? selectedOption.slug : selectedOption.label,
+                    };
+                });
+                if (!selectedVariation) {
+                    throw new Error("Selected product variation is unavailable.");
                 }
-                payload.variation = [{
-                    attribute: "pa_packaging",
-                    value: selectedPackaging,
-                }, ];
+                if (!selectedVariation.is_purchasable) {
+                    throw new Error("This product variation is currently unavailable.");
+                }
+                payload.variation = variationPayload;
             }
+            console.log("Add to cart payload:", payload);
             await cartRequest("cart/add-item", "POST", payload);
             setCartMessage("Product added to cart successfully.");
         }
@@ -336,28 +358,38 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                         }}
                                     />
 
-                                    {packagingOptions.length > 0 && (
+                                    {variationAttributes.length > 0 && (
                                         <div className="product-variation">
-                                            <label htmlFor="product-packaging">
-                                                Packaging:
-                                            </label>
 
-                                            <select
-                                                id="product-packaging"
-                                                value={selectedPackaging}
-                                                onChange={(e) => setSelectedPackaging(e.target.value)}
-                                            >
-                                                <option value="">Choose an option</option>
+                                            {variationAttributes.map((attribute) => (
+                                                <div
+                                                    className="product-variation-option"
+                                                    key={attribute.slug}
+                                                >
+                                                    <label htmlFor={`product-attribute-${attribute.slug}`}>
+                                                        {attribute.name}
+                                                    </label>
 
-                                                {packagingOptions.map((option) => (
-                                                    <option
-                                                        key={option.slug}
-                                                        value={option.label}
+                                                    <select
+                                                        id={`product-attribute-${attribute.slug}`}
+                                                        value={selectedAttributes[attribute.slug] || ""}
+                                                        onChange={(e) =>
+                                                            setSelectedAttributes((prev) => ({
+                                                                ...prev,
+                                                                [attribute.slug]: e.target.value,
+                                                            }))
+                                                        }
                                                     >
-                                                        {option.label}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                        <option value="">Choose an option</option>
+
+                                                        {attribute.options.map((option) => (
+                                                            <option key={option.slug} value={option.slug}>
+                                                                {option.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            ))}
 
                                             <form
                                                 className="product-cart"
@@ -366,6 +398,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                                     handleAddToCart();
                                                 }}
                                             >
+                                                {/* Keep your existing quantity controls and Add to cart button here */}
                                                 <div className="product-qty-wrap">
                                                     <label htmlFor="variable-product-qty">
                                                         Quantity
