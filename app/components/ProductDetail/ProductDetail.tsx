@@ -476,23 +476,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </div>
             </section>
 
-            {product.type === "simple" && (
-                <section className="product-features">
-                    <div className="container">
-                        <div className="product-features-list">
-                            {features.map((item) => (
-                                <article
-                                    key={item.title}
-                                    className="product-feature"
-                                >
-                                    <h3>{item.title}</h3>
-                                    <p>{item.text}</p>
-                                </article>
-                            ))}
-                        </div>
+            <section className="product-features">
+                <div className="container">
+                    <div className="product-features-list">
+                        {features.map((item) => (
+                            <article
+                                key={item.title}
+                                className="product-feature"
+                            >
+                                <h3>{item.title}</h3>
+                                <p>{item.text}</p>
+                            </article>
+                        ))}
                     </div>
-                </section>
-            )}
+                </div>
+            </section>
 
             {showNutritionPopup && product.nutritional_info && (
                 <div

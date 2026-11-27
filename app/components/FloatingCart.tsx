@@ -11,7 +11,7 @@ interface FloatingCartProps {
 export default function FloatingCart({ count = 2 }: FloatingCartProps) {
     return (
         <aside aria-label="Shopping Cart">
-            <Link href="#cart" className="pepsi-floating-cart" aria-label={`View cart with ${count} items`}>
+            <Link href="/cart" className="pepsi-floating-cart" aria-label={`View cart with ${count} items`}>
                 <div className="cart-icon-wrapper">
                     <Image
                         src="/images/icons/cart-icon.svg"
