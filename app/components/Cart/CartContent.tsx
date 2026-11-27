@@ -34,9 +34,24 @@ interface CartItem {
   };
 }
 
+interface CartCoupon {
+  code: string;
+  discount_type: string;
+  totals: {
+    total_discount: string;
+    total_discount_tax: string;
+    currency_code: string;
+    currency_symbol: string;
+    currency_minor_unit: number;
+    currency_prefix: string;
+    currency_suffix: string;
+  };
+}
+
 interface CartData {
   items: CartItem[];
   items_count: number;
+  coupons: CartCoupon[];
   totals: {
     total_items: string;
     total_items_tax: string;
@@ -53,9 +68,14 @@ export default function CartContent() {
   const router = useRouter();
   const [cart, setCart] = useState<CartData | null>(null);
   const [deliveryOption, setDeliveryOption] = useState("delivery");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponMessage, setCouponMessage] = useState("");
+  const [couponMessageType, setCouponMessageType] = useState<"success" | "error">("success");
   const [loading, setLoading] = useState(true);
   const [updatingKey, setUpdatingKey] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [checkoutError, setCheckoutError] = useState("");
 
   const loadCart = async () => {
     try {
@@ -129,6 +149,68 @@ export default function CartContent() {
     }
   };
 
+  const applyCoupon = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const code = couponCode.trim();
+
+    if (!code) {
+      setCouponMessage("Please enter a coupon code.");
+      setCouponMessageType("error");
+      return;
+    }
+
+    try {
+      setCouponLoading(true);
+      setCouponMessage("");
+      setError("");
+
+      const updatedCart = await cartRequest(
+        "cart/apply-coupon",
+        "POST",
+        { code }
+      );
+
+      setCart(updatedCart);
+      setCouponCode("");
+      setCouponMessage("Coupon applied successfully!");
+      setCouponMessageType("success");
+    } catch (err) {
+      setCouponMessage(
+        err instanceof Error ? err.message : "Unable to apply coupon."
+      );
+      setCouponMessageType("error");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = async (code: string) => {
+    try {
+      setCouponLoading(true);
+      setCouponMessage("");
+      setError("");
+
+      await cartRequest(
+        `cart/coupons/${encodeURIComponent(code)}`,
+        "DELETE"
+      );
+
+      const updatedCart = await cartRequest("cart");
+
+      setCart(updatedCart);
+      setCouponMessage(`Coupon "${code}" removed successfully.`);
+      setCouponMessageType("success");
+    } catch (err) {
+      setCouponMessage(
+        err instanceof Error ? err.message : "Unable to remove coupon."
+      );
+      setCouponMessageType("error");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
   if (loading) {
     return <div className="cart-status">Loading cart...</div>;
   }
@@ -142,7 +224,7 @@ export default function CartContent() {
     );
   }
 
-  if (!cart || cart.items.length === 0) {
+  if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
     return (
       <div className="cart-empty">
         <h2>Your cart is empty</h2>
@@ -249,6 +331,33 @@ export default function CartContent() {
         <aside className="cart-summary">
           <h2>Cart Summary</h2>
 
+          <form className="cart-coupon-form" onSubmit={applyCoupon}>
+            <h3>Have a coupon?</h3>
+
+            <div className="cart-coupon-input">
+              <input
+                type="text"
+                placeholder="Enter coupon code"
+                value={couponCode}
+                onChange={(e) => {
+                  setCouponCode(e.target.value);
+                  setCouponMessage("");
+                }}
+                disabled={couponLoading}
+              />
+
+              <button type="submit" disabled={couponLoading}>
+                {couponLoading ? "Applying..." : "Apply Coupon"}
+              </button>
+            </div>
+
+            {couponMessage && (
+              <p className={`cart-coupon-message ${couponMessageType}`}>
+                {couponMessage}
+              </p>
+            )}
+          </form>
+
           <div className="cart-summary-row">
             <span>Subtotal</span>
             <span>
@@ -260,6 +369,37 @@ export default function CartContent() {
               )}
             </span>
           </div>
+
+          {cart.coupons?.map((coupon) => (
+            <div
+              className="cart-summary-row cart-coupon-discount"
+              key={coupon.code}
+            >
+              <div className="cart-applied-coupon">
+                <span>Coupon ({coupon.code})</span>
+                <span className="cart-coupon-applied-label">Applied</span>
+
+                <button
+                  type="button"
+                  className="cart-remove-coupon"
+                  onClick={() => removeCoupon(coupon.code)}
+                  disabled={couponLoading}
+                >
+                  Remove
+                </button>
+              </div>
+
+              <strong>
+                -
+                {formatPrice(
+                  coupon.totals.total_discount,
+                  coupon.totals.currency_minor_unit,
+                  coupon.totals.currency_prefix,
+                  coupon.totals.currency_suffix
+                )}
+              </strong>
+            </div>
+          ))}
 
           <div className="cart-summary-row">
             <span>Tax</span>
@@ -292,10 +432,26 @@ export default function CartContent() {
           <button
             type="button"
             className="cart-checkout-btn"
-            onClick={() => router.push("/checkout")}
+            onClick={() => {
+              if (deliveryOption === "delivery" && cart.items_count < 3) {
+                setCheckoutError(
+                  "Free home delivery requires a minimum purchase of 3 items. Please add more items to your cart."
+                );
+                return;
+              }
+
+              setCheckoutError("");
+              router.push("/checkout");
+            }}
           >
             Proceed to Checkout
           </button>
+
+          {checkoutError && (
+            <p className="cart-checkout-error">
+              {checkoutError}
+            </p>
+          )}
 
           <Link href="/shop" className="continue-shopping">
             Continue Shopping

@@ -37,11 +37,25 @@ async function handleCartRequest(
       cache: "no-store",
     });
 
-    const data = await response.json();
+    // Safely handle empty or non-JSON responses
+    const responseText = await response.text();
 
-    const nextResponse = NextResponse.json(data, {
-      status: response.status,
-    });
+    let data: unknown = {};
+
+    if (responseText) {
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        data = { message: responseText };
+      }
+    }
+
+    const nextResponse =
+      response.status === 204
+        ? new NextResponse(null, { status: 204 })
+        : NextResponse.json(data, {
+            status: response.status,
+          });
 
     // Forward updated WooCommerce session information
     const newCartToken = response.headers.get("Cart-Token");
@@ -55,6 +69,7 @@ async function handleCartRequest(
       nextResponse.headers.set("Nonce", newNonce);
     }
 
+    // Forward WooCommerce cookies
     response.headers.getSetCookie().forEach((cookie) => {
       nextResponse.headers.append("Set-Cookie", cookie);
     });
@@ -64,7 +79,12 @@ async function handleCartRequest(
     console.error("WooCommerce cart proxy error:", error);
 
     return NextResponse.json(
-      { message: "Unable to process cart request." },
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unable to process cart request.",
+      },
       { status: 500 }
     );
   }

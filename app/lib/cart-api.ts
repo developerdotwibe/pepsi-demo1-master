@@ -23,7 +23,8 @@ async function fetchCartWithToken(
     cache: "no-store",
   });
 
-  const data = await response.json();
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : {};
 
   if (!response.ok) {
     throw new Error(data.message || "Unable to process cart request.");
