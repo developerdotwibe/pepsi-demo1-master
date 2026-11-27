@@ -10,6 +10,7 @@ interface CartItem {
   key: string;
   id: number;
   name: string;
+  permalink: string;
   quantity: number;
   quantity_limits: {
     minimum: number;
@@ -76,6 +77,12 @@ export default function CartContent() {
   const [updatingKey, setUpdatingKey] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [checkoutError, setCheckoutError] = useState("");
+
+  const decodeHtmlEntities = (text: string) => {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
 
   const loadCart = async () => {
     try {
@@ -261,7 +268,11 @@ export default function CartContent() {
               </div>
 
               <div className="cart-item-details">
-                <h3>{item.name}</h3>
+                <h3>
+                  <Link href={item.permalink}>
+                    {decodeHtmlEntities(item.name)}
+                  </Link>
+                </h3>
 
                 <p className="cart-item-price">
                   {formatPrice(
@@ -353,7 +364,7 @@ export default function CartContent() {
 
             {couponMessage && (
               <p className={`cart-coupon-message ${couponMessageType}`}>
-                {couponMessage}
+                {decodeHtmlEntities(couponMessage)}
               </p>
             )}
           </form>

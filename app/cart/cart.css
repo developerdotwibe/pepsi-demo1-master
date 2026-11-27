@@ -289,6 +289,15 @@
   cursor: not-allowed;
 }
 
+.cart-item-details h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cart-item-details h3 a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 480px) {
   .cart-coupon-input {
     flex-direction: column;
