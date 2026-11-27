@@ -80,7 +80,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const increase = () => setQuantity((q) => q + 1);
     const [showNutritionPopup, setShowNutritionPopup] = useState(false);
     const [selectedAttributes, setSelectedAttributes] = useState < Record < string, string > > ({});
-    const variationAttributes = product.attributes.filter((attribute) => attribute.is_variation);
+    const variationAttributes = product.attributes.filter(
+        (attribute) => attribute.is_variation);
     const getVariationAttributeKey = (attribute: ApiProductDetail["attributes"][number]) => {
         if (attribute.is_taxonomy) {
             return `attribute_${attribute.slug}`;
@@ -88,13 +89,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         const normalizedName = attribute.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
         return `attribute_${normalizedName}`;
     };
-    const selectedVariation = product.variations?.find((variation) => variationAttributes.every((attribute) => {
+    const matchableAttributes = variationAttributes.filter((attribute) => {
+        const key = getVariationAttributeKey(attribute);
+        return product.variations?.some(
+            (variation) => variation.attributes[key]?.trim() !== "");
+    });
+    const selectedVariation = product.variations?.find((variation) => matchableAttributes.every((attribute) => {
         const selectedSlug = selectedAttributes[attribute.slug];
         if (!selectedSlug) return false;
-        const selectedOption = attribute.options.find((option) => option.slug === selectedSlug);
+        const selectedOption = attribute.options.find(
+            (option) => option.slug === selectedSlug);
         if (!selectedOption) return false;
         const expectedValue = attribute.is_taxonomy ? selectedOption.slug : selectedOption.label;
-        return (variation.attributes[getVariationAttributeKey(attribute)] === expectedValue);
+        const variationValue = variation.attributes[getVariationAttributeKey(attribute)]?.trim();
+        if (!variationValue) return true;
+        return variationValue === expectedValue;
     }));
     const [addingToCart, setAddingToCart] = useState(false);
     const [cartMessage, setCartMessage] = useState("");
@@ -126,7 +135,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             };
             if (product.type === "variable") {
                 const variationPayload = variationAttributes.map((attribute) => {
-                    const selectedOption = attribute.options.find((option) => option.slug === selectedAttributes[attribute.slug]);
+                    const selectedOption = attribute.options.find(
+                        (option) => option.slug === selectedAttributes[attribute.slug]);
                     if (!selectedOption) {
                         throw new Error(`Please select ${attribute.name}.`);
                     }
