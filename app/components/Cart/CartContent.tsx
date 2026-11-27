@@ -31,7 +31,7 @@ interface CartItem {
     currency_suffix: string;
   };
   totals: {
-    line_total: string;
+    line_subtotal: string;
   };
 }
 
@@ -329,7 +329,7 @@ export default function CartContent() {
 
               <div className="cart-item-total">
                 {formatPrice(
-                  item.totals.line_total,
+                  item.totals.line_subtotal,
                   currency.currency_minor_unit,
                   currency.currency_prefix,
                   currency.currency_suffix
