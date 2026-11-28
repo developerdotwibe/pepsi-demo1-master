@@ -68,7 +68,7 @@ export default function DeliveryPickupPage() {
       
       </div>
     </main>
-    <FloatingCart count={2} />
+    <FloatingCart />
     <Footer />
     </>
   );
