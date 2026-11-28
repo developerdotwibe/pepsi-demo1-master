@@ -66,7 +66,7 @@ async function HomeContent() {
                     backgroundImage={meta.home_about_backgroundimg?.[0] || ""}
                 />
 
-                <FloatingCart count={2} />
+                <FloatingCart />
                 <Footer />
             </main>
         </>

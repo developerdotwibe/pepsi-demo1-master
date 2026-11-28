@@ -2,16 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "@/app/context/CartContext";
 import "./floating-cart.css";
 
-interface FloatingCartProps {
-    count?: number;
-}
+export default function FloatingCart() {
+    const { cartCount } = useCart();
 
-export default function FloatingCart({ count = 2 }: FloatingCartProps) {
     return (
         <aside aria-label="Shopping Cart">
-            <Link href="/cart" className="pepsi-floating-cart" aria-label={`View cart with ${count} items`}>
+            <Link
+                href="/cart"
+                className="pepsi-floating-cart"
+                aria-label={`View cart with ${cartCount} items`}
+            >
                 <div className="cart-icon-wrapper">
                     <Image
                         src="/images/icons/cart-icon.svg"
@@ -21,7 +24,8 @@ export default function FloatingCart({ count = 2 }: FloatingCartProps) {
                         style={{ objectFit: "contain" }}
                     />
                 </div>
-                <span className="cart-badge-count">{count}</span>
+
+                <span className="cart-badge-count">{cartCount}</span>
             </Link>
         </aside>
     );

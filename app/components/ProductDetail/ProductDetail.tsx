@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { useCart } from "@/app/context/CartContext";
 import { cartRequest } from "@/app/lib/cart-api";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -79,6 +80,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const decrease = () => setQuantity((q) => Math.max(MIN_QTY, q - 1));
     const increase = () => setQuantity((q) => q + 1);
     const [showNutritionPopup, setShowNutritionPopup] = useState(false);
+    const { setCartCount } = useCart();
     const [selectedAttributes, setSelectedAttributes] = useState < Record < string, string > > ({});
     const variationAttributes = product.attributes.filter(
         (attribute) => attribute.is_variation);
@@ -154,7 +156,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 payload.variation = variationPayload;
             }
             console.log("Add to cart payload:", payload);
-            await cartRequest("cart/add-item", "POST", payload);
+            const updatedCart = await cartRequest("cart/add-item", "POST", payload);
+            setCartCount(updatedCart?.items_count || 0);
             setCartMessage("Product added to cart successfully.");
         }
         catch (error) {

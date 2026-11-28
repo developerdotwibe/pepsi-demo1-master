@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "@/app/context/CartContext";
 import { cartRequest } from "@/app/lib/cart-api";
 
 interface CartItem {
@@ -71,6 +72,7 @@ interface CartContentProps {
 
 export default function CartContent({ pickupMessage }: CartContentProps) {
   const router = useRouter();
+  const { setCartCount } = useCart();
   const [cart, setCart] = useState<CartData | null>(null);
   const [deliveryOption, setDeliveryOption] = useState("delivery");
   const [couponCode, setCouponCode] = useState("");
@@ -95,6 +97,7 @@ export default function CartContent({ pickupMessage }: CartContentProps) {
 
       const data = await cartRequest("cart");
       setCart(data);
+      setCartCount(data?.items_count || 0);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Unable to load cart."
@@ -132,6 +135,7 @@ export default function CartContent({ pickupMessage }: CartContentProps) {
       });
 
       setCart(updatedCart);
+      setCartCount(updatedCart?.items_count || 0);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Unable to update quantity."
@@ -151,6 +155,7 @@ export default function CartContent({ pickupMessage }: CartContentProps) {
       });
 
       setCart(updatedCart);
+      setCartCount(updatedCart?.items_count || 0);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Unable to remove product."
@@ -183,6 +188,7 @@ export default function CartContent({ pickupMessage }: CartContentProps) {
       );
 
       setCart(updatedCart);
+      setCartCount(updatedCart?.items_count || 0);
       setCouponCode("");
       setCouponMessage("Coupon applied successfully!");
       setCouponMessageType("success");
@@ -210,6 +216,7 @@ export default function CartContent({ pickupMessage }: CartContentProps) {
       const updatedCart = await cartRequest("cart");
 
       setCart(updatedCart);
+      setCartCount(updatedCart?.items_count || 0);
       setCouponMessage(`Coupon "${code}" removed successfully.`);
       setCouponMessageType("success");
     } catch (err) {

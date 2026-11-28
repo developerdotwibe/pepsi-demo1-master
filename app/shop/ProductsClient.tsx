@@ -224,7 +224,7 @@ export default function ProductsClient({
                     </div>
                 </main>
 
-                <FloatingCart count={2} />
+                <FloatingCart />
 
                 <ListingRequestModal />
             </div>
